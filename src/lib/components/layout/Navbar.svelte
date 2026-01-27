@@ -1,0 +1,37 @@
+<script lang="ts">
+   import { page } from '$app/stores';
+   import { House, Calendar, User, Search } from 'lucide-svelte';
+
+   const navItems = [
+       { href: '/home', label: 'Home', icon: House },
+       { href: '/appointments', label: 'Appointments', icon: Calendar },
+       { href: '/profile', label: 'Profile', icon: User }
+   ];
+
+   let currentPath = $derived($page.url.pathname);
+
+   // Helper to check if item is active (simple check, maybe improvements later)
+   function isActive(href: string) {
+       return currentPath.startsWith(href);
+   }
+</script>
+
+<nav class="bg-white border-t border-gray-100 px-6 py-3 z-50 shrink-0 w-full">
+   <div class="grid grid-cols-3 items-center justify-items-center w-full max-w-md mx-auto">
+       {#each navItems as item}
+            {@const active = isActive(item.href)}
+           <a 
+               href={item.href}
+               class="flex flex-col items-center gap-1 transition-colors {active ? 'text-[#597dff]' : 'text-gray-400 hover:text-gray-600'}"
+           >
+               <!-- Using fill to simulate active state if supported by lucide, or stroke width -->
+               <item.icon 
+                    size={26} 
+                    strokeWidth={active ? 2.5 : 2} 
+                    class={active ? "fill-current" : ""}
+                />
+               <span class="text-[10px] font-bold tracking-wide">{item.label}</span>
+           </a>
+       {/each}
+   </div>
+</nav>

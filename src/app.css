@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-primary: #597dff;
+  /* Example from mockups, adjust later */
+  --color-secondary: #eef2ff;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f3f4f6;
+  /* Gray-100 */
+  cursor: default;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
