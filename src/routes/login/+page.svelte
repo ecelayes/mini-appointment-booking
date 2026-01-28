@@ -1,6 +1,7 @@
 <script lang="ts">
     import { api } from '$lib/services/api';
     import { authState } from '$lib/stores/auth.svelte';
+    import { signInWithGoogle } from '$lib/services/firebase';
     import { goto } from '$app/navigation';
     import { Calendar } from 'lucide-svelte';
 
@@ -12,11 +13,12 @@
         error = '';
         
         try {
-            // Simulate Google Login
-            const { user, token } = await api.login('alex@example.com');
+            const idToken = await signInWithGoogle();
+            const { user, token } = await api.login(idToken);
             authState.setUser(user, token);
             goto('/home');
         } catch (err: any) {
+            console.error(err);
             error = err.message || 'Login failed';
         } finally {
             loading = false;

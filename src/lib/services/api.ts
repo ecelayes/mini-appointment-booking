@@ -47,14 +47,12 @@ class ApiService {
     };
   }
 
-  async login(email: string): Promise<{ user: User, token: string }> {
-    const token = 'mock-token'; 
-    
+  async login(idToken: string): Promise<{ user: User, token: string }> {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${idToken}`
       },
       body: JSON.stringify({
         role: 'user',
@@ -70,12 +68,12 @@ class ApiService {
     
     const user: User = {
         id: data.uid,
-        name: data.name || email.split('@')[0], 
-        email: data.email || email,
+        name: data.name || 'User', 
+        email: data.email,
         roleId: data.roleId
     };
 
-    return { user, token };
+    return { user, token: idToken };
   }
 
   async getMe(token: string): Promise<User> {
