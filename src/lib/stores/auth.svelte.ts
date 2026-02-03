@@ -1,9 +1,12 @@
 import { browser } from '$app/environment';
-import type { User } from '$lib/services/api';
+import { api, type User } from '$lib/services/api';
+import { auth } from '$lib/services/firebase';
+import { onIdTokenChanged } from 'firebase/auth';
 
 class AuthStore {
   user = $state<User | null>(null);
   isAuthenticated = $derived(!!this.user);
+  private initialized = false;
 
   constructor() {
     if (browser) {
@@ -21,6 +24,25 @@ class AuthStore {
     }
   }
 
+  init() {
+    if (!browser || this.initialized) return;
+    this.initialized = true;
+
+    onIdTokenChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const token = await firebaseUser.getIdToken();
+
+          // Fetch fresh user data from backend to ensure we have latest profile (pic, etc)
+          const user = await api.getMe(token);
+          this.setUser(user, token);
+        } catch (error) {
+          console.error("Error refreshing token", error);
+        }
+      }
+    });
+  }
+
   setUser(user: User | null, token?: string) {
     this.user = user;
     if (browser) {
@@ -28,7 +50,7 @@ class AuthStore {
         localStorage.setItem('user', JSON.stringify(user));
         if (token) {
           localStorage.setItem('auth_token', token);
-          document.cookie = `auth_token=${token}; path=/; max-age=86400`; // 1 day
+          document.cookie = `auth_token=${token}; path=/; max-age=86400`;
         }
       } else {
         localStorage.removeItem('user');

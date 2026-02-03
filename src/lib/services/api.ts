@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { auth } from './firebase';
 
 export interface User {
   id: string;
@@ -16,6 +17,7 @@ export interface Service {
   duration: number; // in minutes
   price: number;
   icon?: string; // e.g. "dental", "cut"
+  color?: string;
 }
 
 export interface Appointment {
@@ -26,6 +28,33 @@ export interface Appointment {
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
   providerName?: string;
   location?: string;
+}
+
+export interface TimeRange {
+  start: string;
+  end: string;
+}
+
+export interface DaySchedule {
+  ranges: TimeRange[];
+  enabled: boolean;
+}
+
+export interface Provider {
+  id: string;
+  phone?: string;
+  address?: string;
+  avatar_url?: string;
+  establishment_name?: string;
+}
+
+export interface Schedule {
+  id?: string;
+  provider_id: string;
+  type: 'global' | 'custom';
+  days: Record<string, DaySchedule>;
+  valid_from?: string;
+  valid_to?: string;
 }
 
 const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:8083';
@@ -42,9 +71,46 @@ class ApiService {
       }
     }
     return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer mock-token'
+      'Content-Type': 'application/json'
     };
+  }
+
+  private async fetchWithRetry(url: string, options: RequestInit = {}): Promise<Response> {
+    let res = await fetch(url, {
+      ...options,
+      headers: {
+        ...this.getHeaders(),
+        ...options.headers
+      }
+    });
+
+    if (res.status === 401 && browser && auth.currentUser) {
+      try {
+        const newToken = await auth.currentUser.getIdToken(true);
+        localStorage.setItem('auth_token', newToken);
+
+        res = await fetch(url, {
+          ...options,
+          headers: {
+            ...this.getHeaders(),
+            ...options.headers
+          }
+        });
+      } catch (e) {
+        console.error("Token refresh failed during retry", e);
+      }
+    }
+
+    if (res.status === 401 && browser) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('auth_token');
+      document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      window.location.href = '/login';
+
+      throw new Error('Session expired. Redirecting to login...');
+    }
+
+    return res;
   }
 
   async login(idToken: string): Promise<{ user: User, token: string }> {
@@ -61,16 +127,17 @@ class ApiService {
     });
 
     if (!res.ok) {
-        throw new Error('Login failed: ' + res.statusText);
+      throw new Error('Login failed: ' + res.statusText);
     }
 
     const data = await res.json();
-    
+
     const user: User = {
-        id: data.uid,
-        name: data.name || 'User', 
-        email: data.email,
-        roleId: data.roleId
+      id: data.uid,
+      name: data.name || 'User',
+      email: data.email,
+      picture: data.picture,
+      roleId: data.roleId
     };
 
     return { user, token: idToken };
@@ -82,110 +149,312 @@ class ApiService {
         'Authorization': `Bearer ${token}`
       }
     });
-    
+
     if (!res.ok) throw new Error('Failed to fetch user');
-    
+
     const data = await res.json();
     return {
-        id: data.id,
-        name: data.name || 'User',
-        email: data.email,
-        picture: data.picture,
-        roleId: data.roleId
+      id: data.id,
+      name: data.name || 'User',
+      email: data.email,
+      picture: data.picture,
+      roleId: data.roleId
     };
   }
 
   async getServices(): Promise<Service[]> {
-    const res = await fetch(`${BASE_URL}/api/services`, {
-        headers: this.getHeaders()
-    });
-    
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/services`);
+
     if (!res.ok) throw new Error('Failed to fetch services');
-    
+
     const data = await res.json();
     if (!Array.isArray(data)) return [];
 
     return data.map((item: any) => ({
-        id: item.id,
-        name: item.title || 'Untitled Service',
-        description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
-        duration: item.duration_minutes || 0,
-        price: 0,
-        icon: item.icon_url
+      id: item.id,
+      name: item.title || 'Untitled Service',
+      description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
+      duration: item.duration_minutes || 0,
+      price: item.price !== undefined ? item.price : (item.cost !== undefined ? item.cost : 0),
+      icon: item.icon_url,
+      color: item.color
     }));
+  }
+
+  async createService(service: Partial<Service>): Promise<Service> {
+    const payload = {
+      title: service.name,
+      description: service.description,
+      duration_minutes: service.duration,
+      price: service.price,
+      icon_url: service.icon,
+      color: service.color
+    };
+
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/services`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Failed to create service');
+
+    const item = await res.json();
+    return {
+      id: item.id,
+      name: item.title || 'Untitled Service',
+      description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
+      duration: item.duration_minutes || 0,
+      price: item.price !== undefined ? item.price : (item.cost !== undefined ? item.cost : 0),
+      icon: item.icon_url,
+      color: item.color
+    };
+  }
+
+  async updateService(id: string, service: Partial<Service>): Promise<Service> {
+    const payload = {
+      title: service.name,
+      description: service.description,
+      duration_minutes: service.duration,
+      price: service.price,
+      icon_url: service.icon,
+      color: service.color
+    };
+
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/services/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Failed to update service');
+
+    const item = await res.json();
+    return {
+      id: item.id,
+      name: item.title || 'Untitled Service',
+      description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
+      duration: item.duration_minutes || 0,
+      price: item.price !== undefined ? item.price : (item.cost !== undefined ? item.cost : 0),
+      icon: item.icon_url,
+      color: item.color
+    };
+  }
+
+  async deleteService(id: string): Promise<void> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/services/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) throw new Error('Failed to delete service');
   }
 
   async getService(id: string): Promise<Service | undefined> {
     try {
-        const res = await fetch(`${BASE_URL}/api/services/${id}`, {
-            headers: this.getHeaders()
-        });
-        if (!res.ok) return undefined;
-        const item = await res.json();
-        
-        return {
-            id: item.id,
-            name: item.title || 'Untitled Service',
-            description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
-            duration: item.duration_minutes || 0,
-            price: 0,
-            icon: item.icon_url
-        };
+      const res = await this.fetchWithRetry(`${BASE_URL}/api/services/${id}`);
+      if (!res.ok) return undefined;
+      const item = await res.json();
+
+      return {
+        id: item.id,
+        name: item.title || 'Untitled Service',
+        description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
+        duration: item.duration_minutes || 0,
+        price: item.price !== undefined ? item.price : (item.cost !== undefined ? item.cost : 0),
+        icon: item.icon_url,
+        color: item.color
+      };
     } catch (e) {
-        console.error(e);
-        return undefined;
+      console.error(e);
+      return undefined;
     }
   }
 
-  async getAppointments(): Promise<Appointment[]> {
-    const res = await fetch(`${BASE_URL}/api/appointments`, {
-        headers: this.getHeaders()
-    });
-    
+  async getAppointments(options?: { type?: 'upcoming' | 'past', limit?: number, offset?: number }): Promise<Appointment[]> {
+    const params = new URLSearchParams();
+    if (options?.type) params.append('type', options.type);
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.offset) params.append('offset', options.offset.toString());
+
+    const queryString = params.toString();
+    const url = `${BASE_URL}/api/appointments${queryString ? `?${queryString}` : ''}`;
+
+    const [res, services] = await Promise.all([
+      this.fetchWithRetry(url),
+      this.getServices().catch(() => [])
+    ]);
+
     if (!res.ok) throw new Error('Failed to fetch appointments');
-    
+
     const data = await res.json();
     if (!Array.isArray(data)) return [];
 
-    return data.map((item: any) => ({
+    const serviceMap = new Map(services.map(s => [s.id, s]));
+
+    let appointments = data.map((item: any) => {
+      const service = serviceMap.get(item.service);
+      return {
         id: item.id,
-        serviceId: item.service, 
-        serviceName: 'Service', 
+        serviceId: item.service,
+        serviceName: service ? service.name : (item.service_name || item.service_title || 'Service'),
         date: item.scheduled_at,
         status: item.status || 'confirmed',
         providerName: item.provider,
         location: 'Online'
-    }));
+      };
+    });
+
+    // Client-side filtering/sorting/pagination fallback
+    // This logic handles backends that ignore query parameters (limit/type/offset)
+    if (options) {
+      const now = new Date();
+
+      if (options.type) {
+        appointments = appointments.filter((a: Appointment) => {
+          const apptDate = new Date(a.date);
+          const isPast = apptDate < now;
+          if (options.type === 'upcoming') {
+            return !isPast && a.status !== 'completed' && a.status !== 'cancelled';
+          } else {
+            return isPast || a.status === 'completed';
+          }
+        });
+      }
+
+      appointments.sort((a: Appointment, b: Appointment) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return options.type === 'upcoming' ? dateA - dateB : dateB - dateA;
+      });
+
+      if (options.offset !== undefined && options.limit !== undefined) {
+        // Heuristic: If backend returned more items than requested limit, it ignored pagination params.
+        // In this case, we must enforce pagination on the client side.
+        if (data.length > options.limit) {
+          appointments = appointments.slice(options.offset, options.offset + options.limit);
+        }
+      }
+    }
+
+    return appointments;
+  }
+
+  async getAvailableSlots(serviceId: string, date: string): Promise<string[]> {
+    const offset = -new Date().getTimezoneOffset();
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/slots?service=${serviceId}&date=${date}&timezone_offset=${offset}`);
+
+    if (!res.ok) {
+      return [];
+    }
+
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }
+
+  async getAppointment(id: string): Promise<Appointment> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/appointments/${id}`);
+
+    if (!res.ok) throw new Error('Failed to fetch appointment');
+
+    const item = await res.json();
+    return {
+      id: item.id,
+      serviceId: item.service,
+      serviceName: item.service_name || item.service_title || 'Service',
+      date: item.scheduled_at,
+      status: item.status || 'confirmed',
+      providerName: item.provider,
+      location: 'Online' // Default for now
+    };
   }
 
   async createAppointment(appointment: Partial<Appointment>): Promise<Appointment> {
     const payload = {
-        scheduled_at: appointment.date,
-        status: 'confirmed',
-        service: appointment.serviceId,
-        provider: 'default-provider',
-        notes: 'Created via frontend'
+      scheduled_at: appointment.date,
+      status: 'confirmed',
+      service: appointment.serviceId,
+      provider: appointment.providerName,
+      notes: 'Created via frontend'
     };
 
-    const res = await fetch(`${BASE_URL}/api/appointments`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(payload)
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/appointments`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
 
     if (!res.ok) throw new Error('Failed to create appointment');
 
     const created = await res.json();
-    
+
     return {
-        id: created.id,
-        serviceId: created.service,
-        serviceName: appointment.serviceName || 'Service',
-        date: created.scheduled_at,
-        status: created.status,
-        providerName: created.provider,
-        location: 'Online'
+      id: created.id,
+      serviceId: created.service,
+      serviceName: appointment.serviceName || 'Service',
+      date: created.scheduled_at,
+      status: created.status,
+      providerName: created.provider,
+      location: 'Online'
     };
+  }
+
+  async getFirstProvider(): Promise<any> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/providers?limit=1`);
+
+    if (!res.ok) throw new Error('Failed to fetch provider');
+
+    const data = await res.json();
+    return data && data.length > 0 ? data[0] : null;
+  }
+
+  async updateProvider(id: string, data: any): Promise<void> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/providers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+
+    if (!res.ok) throw new Error('Failed to update provider');
+  }
+
+  async createProvider(provider: Partial<Provider>): Promise<Provider> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/providers`, {
+      method: 'POST',
+      body: JSON.stringify(provider)
+    });
+
+    if (!res.ok) throw new Error('Failed to create provider');
+
+    const created = await res.json();
+
+    return {
+      id: created.id,
+      phone: created.phone,
+      address: created.address,
+      avatar_url: created.avatar_url,
+      establishment_name: created.establishment_name
+    };
+  }
+
+  async getMyProvider(): Promise<Provider | null> {
+    const provider = await this.getFirstProvider();
+    if (!provider) return null;
+    return provider as Provider;
+  }
+
+  async getProviderSchedule(providerId: string, type: 'global' | 'custom' = 'global'): Promise<Schedule | null> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/schedules?provider_id=${providerId}&type=${type}`);
+    if (!res.ok) throw new Error('Failed to fetch schedule');
+
+    const data = await res.json();
+    if (!data || !data.days) return null;
+
+    return data as Schedule;
+  }
+
+  async updateProviderSchedule(schedule: Schedule): Promise<void> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/schedules`, {
+      method: 'PUT',
+      body: JSON.stringify(schedule)
+    });
+
+    if (!res.ok) throw new Error('Failed to update schedule');
   }
 }
 

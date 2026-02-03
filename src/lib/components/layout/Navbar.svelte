@@ -1,12 +1,13 @@
 <script lang="ts">
    import { page } from '$app/stores';
-   import { House, Calendar, User, Search } from 'lucide-svelte';
+    import { House, Calendar, User, Search, Store } from 'lucide-svelte';
 
-   const navItems = [
-       { href: '/home', label: 'Home', icon: House },
-       { href: '/appointments', label: 'Appointments', icon: Calendar },
-       { href: '/profile', label: 'Profile', icon: User }
-   ];
+    const navItems = [
+        { href: '/home', label: 'Home', icon: House },
+        { href: '/appointments', label: 'Appointments', icon: Calendar },
+        { href: '/services', label: 'Manage', icon: Store },
+        { href: '/profile', label: 'Profile', icon: User }
+    ];
 
    let currentPath = $derived($page.url.pathname);
 
@@ -17,8 +18,8 @@
 </script>
 
 <nav class="bg-white border-t border-gray-100 px-6 py-3 z-50 shrink-0 w-full">
-   <div class="grid grid-cols-3 items-center justify-items-center w-full max-w-md mx-auto">
-       {#each navItems as item}
+    <div class="grid grid-cols-4 items-center justify-items-center w-full max-w-md mx-auto">
+        {#each navItems as item}
             {@const active = isActive(item.href)}
            <a 
                href={item.href}

@@ -14,12 +14,7 @@
     let currentDate = $state(new Date());
     let selectedDate = $state<Date | null>(null);
     let selectedTime = $state<string | null>(null);
-
-    // Mock Times
-    const timeSlots = [
-        "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", 
-        "11:00 AM", "11:30 AM", "1:00 PM", "1:30 PM", "2:00 PM"
-    ];
+    let timeSlots = $state<string[]>([]);
 
     onMount(async () => {
         service = await api.getService(serviceId ?? '');
@@ -46,25 +41,43 @@
         currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     }
 
-    function selectDate(day: number) {
+    async function selectDate(day: number) {
+        // Construct date in local time
         selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         selectedTime = null; // Reset time
+        
+        if (service) {
+             // Format date as YYYY-MM-DD to avoid timezone shifts
+             const year = selectedDate.getFullYear();
+             const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+             const d = String(selectedDate.getDate()).padStart(2, '0');
+             const dateStr = `${year}-${month}-${d}`;
+             
+             timeSlots = await api.getAvailableSlots(service.id, dateStr);
+        }
     }
 
     async function handleConfirm() {
         if (!selectedDate || !selectedTime || !service) return;
         
-        // Construct ISO date combining selectedDate + selectedTime
-        // Rough implementation for mock
-        const dateStr = selectedDate.toISOString(); 
+        // Combine selectedDate (YYYY-MM-DD) and selectedTime (HH:mm) into a full ISO string
+        // We set the time on the selectedDate object
+        const [hours, minutes] = selectedTime.split(':').map(Number);
+        
+        const appointmentDate = new Date(selectedDate);
+        appointmentDate.setHours(hours);
+        appointmentDate.setMinutes(minutes);
+        appointmentDate.setSeconds(0);
+        
+        const dateStr = appointmentDate.toISOString(); 
 
-        await api.createAppointment({
+        const created = await api.createAppointment({
             serviceId: service.id,
             serviceName: service.name,
             date: dateStr,
         });
 
-        goto('/booking/confirmation');
+        goto(`/booking/confirmation?id=${created.id}`);
     }
 </script>
 
