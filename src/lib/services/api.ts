@@ -30,6 +30,7 @@ export interface Appointment {
   location?: string;
 }
 
+
 export interface TimeRange {
   start: string;
   end: string;
@@ -290,10 +291,10 @@ class ApiService {
     const serviceMap = new Map(services.map(s => [s.id, s]));
 
     let appointments = data.map((item: any) => {
-      const service = serviceMap.get(item.service);
+      const service = serviceMap.get(item.service_id);
       return {
         id: item.id,
-        serviceId: item.service,
+        serviceId: item.service_id,
         serviceName: service ? service.name : (item.service_name || item.service_title || 'Service'),
         date: item.scheduled_at,
         status: item.status || 'confirmed',

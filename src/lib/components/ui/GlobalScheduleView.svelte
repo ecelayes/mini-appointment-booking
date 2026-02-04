@@ -39,19 +39,6 @@
       loading = true;
       provider = await api.getMyProvider();
       
-      if (!provider) {
-          // Auto-create provider profile if missing
-          console.log("No provider profile found, creating one...");
-          const user = authState.user;
-          const newProvider = await api.createProvider({
-              full_name: user?.name || 'My Provider',
-              establishment_name: 'My Business',
-              address: 'Online',
-              schedule: {} // Empty schedule initially
-          });
-          provider = newProvider;
-      }
-
       if (provider) {
         // Fetch separate schedule
         currentSchedule = await api.getProviderSchedule(provider.id, 'global');
@@ -59,7 +46,8 @@
              rules = convertScheduleToRules(currentSchedule.days);
         }
       } else {
-        error = "Failed to initialize provider profile.";
+        // Provider not found - user needs to set up business details first
+        error = "Please set up your Business Details in the Profile page to manage your schedule.";
       }
     } catch (e) {
       console.error("Failed to load provider schedule", e);
