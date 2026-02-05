@@ -199,6 +199,8 @@
   onSave={handleSave}
 />
 
+
+
 {#if view === "global_schedule"}
   <GlobalScheduleView
     onBack={async () => {
@@ -257,12 +259,11 @@
             <span>Add New Service</span>
           </button>
         {:else}
-          <div
-            class="w-full bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center"
-          >
-            <p class="text-sm text-yellow-700 font-medium">
-              You need to upload the business data to enable service loading
-            </p>
+          <div class="text-center py-10 bg-yellow-50 rounded-2xl border border-yellow-200 p-6">
+             <p class="text-yellow-700 font-medium mb-4">You need to upload the business data to enable service loading</p>
+             <a href="/profile?action=edit_business" class="text-blue-600 font-bold hover:underline inline-block">
+                 Configure Business Profile
+             </a>
           </div>
         {/if}
 

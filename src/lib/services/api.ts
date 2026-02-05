@@ -48,6 +48,7 @@ export interface Provider {
   address?: string;
   avatar_url?: string;
   establishment_name?: string;
+  full_name?: string;
 }
 
 export interface Schedule {
@@ -183,8 +184,8 @@ class ApiService {
     }));
   }
 
-  async createService(service: Partial<Service>): Promise<Service> {
-    const payload = {
+  async createService(service: Partial<Service>, providerId?: string): Promise<Service> {
+    const payload: any = {
       title: service.name,
       description: service.description,
       duration_minutes: service.duration,
@@ -192,6 +193,10 @@ class ApiService {
       icon_url: service.icon,
       color: service.color
     };
+
+    if (providerId) {
+      payload.provider_id = providerId;
+    }
 
     const res = await this.fetchWithRetry(`${BASE_URL}/api/services`, {
       method: 'POST',

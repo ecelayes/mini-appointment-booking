@@ -56,7 +56,8 @@ class BusinessStore {
   }
 
   async createService(data: Partial<Service>) {
-    const item = await api.createService(data);
+    if (!this.provider) throw new Error("No provider set");
+    const item = await api.createService(data, this.provider.id);
     this.services = [...this.services, item];
     return item;
   }

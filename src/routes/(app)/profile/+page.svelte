@@ -10,13 +10,31 @@
     Store
   } from "lucide-svelte";
 
+  import { page } from "$app/stores";
+  
+  // ... imports
+
   let isProviderModalOpen = $state(false);
+
+  $effect(() => {
+    if ($page.url.searchParams.get('action') === 'edit_business') {
+        isProviderModalOpen = true;
+    }
+  });
 
   function handleLogout() {
     authState.logout();
   }
 
-  const menuItems = [
+  interface MenuItem {
+    label: string;
+    icon: any;
+    action?: () => void;
+    href?: string;
+    variant?: "danger";
+  }
+
+  const menuItems: { group: string; items: MenuItem[] }[] = [
     {
       group: "SETTINGS",
       items: [

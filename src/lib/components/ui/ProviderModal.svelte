@@ -1,8 +1,9 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import FormModal from './FormModal.svelte';
-    import { api, type Provider } from '$lib/services/api';
+    import { api } from '$lib/services/api';
     import { authState } from '$lib/stores/auth.svelte';
+    import { businessState } from '$lib/stores/business.svelte';
 
     interface Props {
         isOpen: boolean;
@@ -33,7 +34,6 @@
                 address = provider.address || '';
                 phone = provider.phone || '';
             } else {
-                // Initialize defaults if creating fresh
                 providerId = null;
                 establishmentName = '';
                 address = '';
@@ -54,13 +54,12 @@
         };
 
         if (providerId) {
-            await api.updateProvider(providerId, data);
+            await businessState.updateProvider(providerId, data);
         } else {
-            await api.createProvider({
+            await businessState.createProvider({
                 ...data,
                 full_name: authState.user?.name || 'Provider',
-                user_id: authState.user?.id,
-                schedule: {}
+                user_id: authState.user?.id
             });
         }
     }
