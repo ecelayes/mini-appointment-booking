@@ -43,6 +43,7 @@ export interface DaySchedule {
 
 export interface Provider {
   id: string;
+  user_id?: string;
   phone?: string;
   address?: string;
   avatar_url?: string;

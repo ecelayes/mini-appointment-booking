@@ -59,6 +59,7 @@
             await api.createProvider({
                 ...data,
                 full_name: authState.user?.name || 'Provider',
+                user_id: authState.user?.id,
                 schedule: {}
             });
         }

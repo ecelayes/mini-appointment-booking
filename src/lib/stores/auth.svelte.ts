@@ -6,28 +6,12 @@ import { onIdTokenChanged } from 'firebase/auth';
 class AuthStore {
   user = $state<User | null>(null);
   isAuthenticated = $derived(!!this.user);
+  loggingIn = $state(false);
   private initialized = false;
 
   constructor() {
     if (browser) {
-      // Try to load from localStorage or cookie simulation if needed?
-      // Actually, we rely on server-side hooks to handle sessions mostly for redirects,
-      // but client-side state is good for UI.
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed && parsed.id) {
-            this.user = parsed;
-          } else {
-            console.warn("Cleared invalid user data from localStorage");
-            localStorage.removeItem('user');
-          }
-        } catch (e) {
-          console.error("Failed to parse stored user", e);
-          localStorage.removeItem('user');
-        }
-      }
+      // We rely on the token. User data is fetched on init().
     }
   }
 
@@ -37,6 +21,10 @@ class AuthStore {
 
     onIdTokenChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // If we are in the middle of a manual login flow, do NOT fetch me automatically.
+        // The manual flow will handle the backend creation/fetch to avoid 404s.
+        if (this.loggingIn) return;
+
         try {
           const token = await firebaseUser.getIdToken();
 
@@ -46,6 +34,8 @@ class AuthStore {
         } catch (error) {
           console.error("Error refreshing token", error);
         }
+      } else {
+        this.setUser(null);
       }
     });
   }
@@ -53,14 +43,10 @@ class AuthStore {
   setUser(user: User | null, token?: string) {
     this.user = user;
     if (browser) {
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        if (token) {
-          localStorage.setItem('auth_token', token);
-          document.cookie = `auth_token=${token}; path=/; max-age=86400`;
-        }
-      } else {
-        localStorage.removeItem('user');
+      if (user && token) {
+        localStorage.setItem('auth_token', token);
+        document.cookie = `auth_token=${token}; path=/; max-age=86400`;
+      } else if (!user) {
         localStorage.removeItem('auth_token');
         document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }

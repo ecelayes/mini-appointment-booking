@@ -11,10 +11,12 @@
     async function handleGoogleLogin() {
         loading = true;
         error = '';
+        authState.loggingIn = true;
         
         try {
             const idToken = await signInWithGoogle();
-            const { user, token } = await api.login(idToken);
+            const { token } = await api.login(idToken);
+            const user = await api.getMe(token);
             authState.setUser(user, token);
             goto('/home');
         } catch (err: any) {
@@ -22,6 +24,7 @@
             error = err.message || 'Login failed';
         } finally {
             loading = false;
+            authState.loggingIn = false;
         }
     }
 </script>

@@ -8,32 +8,45 @@
     import Card from '$lib/components/ui/Card.svelte';
     import BookingModal from '$lib/components/ui/BookingModal.svelte';
 
+    import { businessState } from "$lib/stores/business.svelte";
+
     let appointments = $state<Appointment[]>([]);
-    let loading = $state(true);
+    let loadingAppointments = $state(true);
+    let loading = $derived(businessState.loading || loadingAppointments);
     let isBookingModalOpen = $state(false);
+    
+    // Derived from store
+    let hasServices = $derived(businessState.services.length > 0);
 
     onMount(() => {
-        loadAppointments();
+        loadPageData();
     });
 
-    async function loadAppointments() {
-        loading = true;
+    async function loadPageData() {
+        loadingAppointments = true;
         try {
-            const res = await api.getAppointments({ type: 'upcoming', limit: 20 });
-            
-            const today = new Date();
-            const todayStr = today.toDateString();
+            // Load core business data (provider, services) via store
+            await businessState.loadBusinessData();
 
-            appointments = res
-                .filter(a => {
-                    const d = new Date(a.date);
-                    return d.toDateString() === todayStr && a.status !== 'cancelled';
-                })
-                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            if (businessState.services.length > 0) {
+                const res = await api.getAppointments({ type: 'upcoming', limit: 20 });
+                
+                const today = new Date();
+                const todayStr = today.toDateString();
+
+                appointments = res
+                    .filter(a => {
+                        const d = new Date(a.date);
+                        return d.toDateString() === todayStr && a.status !== 'cancelled';
+                    })
+                    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            } else {
+                appointments = [];
+            }
         } catch (e) {
             console.error(e);
         } finally {
-            loading = false;
+            loadingAppointments = false;
         }
     }
 
@@ -51,7 +64,7 @@
     isOpen={isBookingModalOpen} 
     onClose={() => isBookingModalOpen = false} 
     onSuccess={() => {
-        loadAppointments();
+        loadPageData();
     }}
 />
 
@@ -75,12 +88,15 @@
                 Welcome back, {authState.user?.name || 'User'}!
             </h2>
             
+            {#if hasServices}
             <Button fullWidth onclick={() => isBookingModalOpen = true} class="h-14 text-lg shadow-blue-200/50 shadow-lg">
                 Book a New Appointment
             </Button>
+            {/if}
         </section>
 
         <!-- Today's Appointments -->
+        {#if hasServices}
         <section>
             <h3 class="text-lg font-bold text-gray-900 mb-4">Today's Appointments</h3>
             
@@ -123,5 +139,11 @@
                 {/if}
             </div>
         </section>
+        {:else if !loading}
+            <section class="text-center py-10 bg-yellow-50 rounded-2xl border border-yellow-200 p-6">
+                 <p class="text-yellow-700 font-medium mb-4">You haven't configured any services yet.</p>
+                 <a href="/services" class="text-blue-600 font-bold hover:underline">Go to Services to get started</a>
+            </section>
+        {/if}
     </div>
 </div>
