@@ -18,18 +18,18 @@
     
     <!-- Modal Container -->
     <div 
-        class="bg-white w-full sm:max-w-md h-[85vh] sm:h-auto rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden transform transition-all animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+        class="bg-white dark:bg-gray-900 w-full sm:max-w-md h-[85vh] sm:h-auto rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden transform transition-all animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         onclick={(e) => e.stopPropagation()}
         role="button"
         tabindex="0"
         onkeydown={(e) => e.key === 'Escape' && onClose()}
     >
         <!-- Header -->
-        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 shrink-0">
-            <h2 class="text-xl font-bold text-gray-900">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 shrink-0">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">
                 {title}
             </h2>
-            <button onclick={onClose} class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors">
+            <button onclick={onClose} class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <X size={20} />
             </button>
         </div>
@@ -41,7 +41,7 @@
 
         <!-- Footer -->
         {#if footer}
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 shrink-0">
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 shrink-0">
             {@render footer()}
         </div>
         {/if}

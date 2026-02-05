@@ -17,13 +17,13 @@
    }
 </script>
 
-<nav class="bg-white border-t border-gray-100 px-6 py-3 z-50 shrink-0 w-full">
+<nav class="bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 px-6 py-3 z-50 shrink-0 w-full">
     <div class="grid grid-cols-4 items-center justify-items-center w-full max-w-md mx-auto">
         {#each navItems as item}
             {@const active = isActive(item.href)}
            <a 
                href={item.href}
-               class="flex flex-col items-center gap-1 transition-colors {active ? 'text-[#597dff]' : 'text-gray-400 hover:text-gray-600'}"
+               class="flex flex-col items-center gap-1 transition-colors {active ? 'text-[#597dff] dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}"
            >
                <!-- Using fill to simulate active state if supported by lucide, or stroke width -->
                <item.icon 

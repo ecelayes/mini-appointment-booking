@@ -95,7 +95,7 @@
       <div class="flex gap-3 flex-wrap">
           {#each icons as i}
               <button 
-                  class={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${icon === i.id ? 'bg-blue-600 text-white shadow-md scale-105' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                  class={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${icon === i.id ? 'bg-blue-600 text-white shadow-md scale-105' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
                   onclick={() => icon = i.id}
                   type="button"
               >
@@ -111,7 +111,7 @@
       <div class="flex gap-3 flex-wrap">
           {#each colors as c}
               <button 
-                  class={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${c.bg} ${c.text} ${color === c.id ? `ring-2 ring-offset-2 ${c.selectedRing} scale-110` : 'hover:scale-105'}`}
+                  class={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${c.bg} ${c.text} ${color === c.id ? `ring-2 ring-offset-2 dark:ring-offset-gray-900 ${c.selectedRing} scale-110` : 'hover:scale-105'}`}
                   onclick={() => color = c.id}
                   type="button"
               >
@@ -125,49 +125,49 @@
 
     <!-- Name -->
     <div class="space-y-2">
-        <label for="name" class="block text-sm font-medium text-gray-700">Service Name</label>
+        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Name</label>
         <input 
             type="text" 
             id="name"
             bind:value={name}
             placeholder="e.g. Dental Check-up"
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
         />
     </div>
 
     <!-- Description -->
     <div class="space-y-2">
-        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
         <textarea 
             id="description"
             bind:value={description}
             rows="3"
             placeholder="Brief description of the service..."
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
         ></textarea>
     </div>
 
     <!-- Duration & Price Row -->
     <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
-            <label for="duration" class="block text-sm font-medium text-gray-700">Duration (min)</label>
+            <label for="duration" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (min)</label>
             <input 
                 type="number" 
                 id="duration"
                 bind:value={duration}
                 min="1"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
         </div>
         <div class="space-y-2">
-            <label for="price" class="block text-sm font-medium text-gray-700">Price ($)</label>
+            <label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price ($)</label>
             <input 
                 type="number" 
                 id="price"
                 bind:value={price}
                 min="0"
                 step="0.01"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
         </div>
     </div>

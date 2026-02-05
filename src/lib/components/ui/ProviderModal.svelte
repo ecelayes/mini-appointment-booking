@@ -75,44 +75,44 @@
 >
     {#if loading}
         <div class="space-y-4 animate-pulse">
-            <div class="h-12 bg-gray-100 rounded-xl w-full"></div>
-            <div class="h-12 bg-gray-100 rounded-xl w-full"></div>
-            <div class="h-12 bg-gray-100 rounded-xl w-full"></div>
+            <div class="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl w-full"></div>
+            <div class="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl w-full"></div>
+            <div class="h-12 bg-gray-100 dark:bg-gray-800 rounded-xl w-full"></div>
         </div>
     {:else}
         <!-- Establishment Name -->
         <div class="space-y-2">
-            <label for="estNAme" class="block text-sm font-medium text-gray-700">Establishment Name</label>
+            <label for="estNAme" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Establishment Name</label>
             <input 
                 type="text" 
                 id="estNAme"
                 bind:value={establishmentName}
                 placeholder="e.g. Runik Salon"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
         </div>
 
         <!-- Address -->
         <div class="space-y-2">
-            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+            <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Address</label>
             <input 
                 type="text" 
                 id="address"
                 bind:value={address}
                 placeholder="e.g. 123 Main St"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
         </div>
 
         <!-- Phone -->
         <div class="space-y-2">
-            <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
             <input 
                 type="tel" 
                 id="phone"
                 bind:value={phone}
                 placeholder="e.g. +1 234 567 890"
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
             />
         </div>
     {/if}

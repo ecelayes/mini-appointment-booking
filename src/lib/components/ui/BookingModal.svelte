@@ -37,17 +37,16 @@
     };
 
     const colorPresets: Record<string, { bg: string, text: string }> = {
-        blue: { bg: 'bg-blue-100', text: 'text-blue-600' },
-        purple: { bg: 'bg-purple-100', text: 'text-purple-600' },
-        green: { bg: 'bg-green-100', text: 'text-green-600' },
-        orange: { bg: 'bg-orange-100', text: 'text-orange-600' },
-        pink: { bg: 'bg-pink-100', text: 'text-pink-600' },
-        red: { bg: 'bg-red-100', text: 'text-red-600' },
-        gray: { bg: 'bg-gray-100', text: 'text-gray-600' }
+        purple: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400' },
+        green: { bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-600 dark:text-green-400' },
+        orange: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400' },
+        pink: { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-600 dark:text-pink-400' },
+        red: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400' },
+        gray: { bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-600 dark:text-gray-400' }
     };
 
     function getServiceStyles(color?: string) {
-        return colorPresets[color || 'blue'] || colorPresets['blue'];
+        return colorPresets[color || 'blue'] || { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400' };
     }
 
     // Effect: Reset when closed
@@ -212,7 +211,7 @@
     {#if step > 0}
         <button 
             onclick={handleBack}
-            class="mb-4 flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+            class="mb-4 flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
         >
             <ChevronLeft size={16} class="mr-1" />
             Back
@@ -234,15 +233,15 @@
                         {@const Icon = iconMap[rawIcon.toLowerCase()] || Briefcase}
                         
                         <button 
-                            class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all text-left flex flex-col items-start gap-3 group"
+                            class="bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all text-left flex flex-col items-start gap-3 group"
                             onclick={() => selectService(service)}
                         >
                             <div class={`w-10 h-10 rounded-xl flex items-center justify-center ${styles.bg} ${styles.text} group-hover:scale-110 transition-transform`}>
                                 <Icon size={20} />
                             </div>
                             <div>
-                                <h3 class="font-bold text-gray-900">{service.name}</h3>
-                                <p class="text-xs text-gray-500 mt-1 line-clamp-2">{service.description}</p>
+                                <h3 class="font-bold text-gray-900 dark:text-white">{service.name}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{service.description}</p>
                             </div>
                         </button>
                     {/each}
@@ -254,13 +253,13 @@
     {:else if step === 1}
         <div class="flex flex-col items-center">
             <div class="w-full flex items-center justify-between mb-6 px-2">
-                <button onclick={() => changeMonth(-1)} class="p-1 hover:bg-gray-100 rounded-full">
+                <button onclick={() => changeMonth(-1)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-900 dark:text-white">
                     <ChevronLeft size={20} />
                 </button>
-                <h3 class="font-bold text-lg">
+                <h3 class="font-bold text-lg text-gray-900 dark:text-white">
                     {viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </h3>
-                <button onclick={() => changeMonth(1)} class="p-1 hover:bg-gray-100 rounded-full">
+                <button onclick={() => changeMonth(1)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-900 dark:text-white">
                     <ChevronRight size={20} />
                 </button>
             </div>
@@ -281,9 +280,9 @@
                             onclick={() => selectDate(date)}
                             class={`
                                 h-10 w-10 text-sm font-medium rounded-full flex items-center justify-center transition-all
-                                ${isToday ? 'bg-blue-50 text-blue-600 font-bold' : ''}
+                                ${isToday ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 font-bold' : ''}
                                 ${selectedDate?.toDateString() === date.toDateString() ? '!bg-blue-600 !text-white transform scale-110 shadow-lg' : ''}
-                                ${isPast ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-gray-100 text-gray-900'}
+                                ${isPast ? 'text-gray-300 dark:text-gray-700 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-200'}
                             `}
                         >
                             {date.getDate()}
@@ -303,8 +302,8 @@
             </div>
         {:else if availableSlots.am.length === 0 && availableSlots.pm.length === 0}
              <div class="text-center py-10">
-                <p class="text-gray-500">No available slots on this date.</p>
-                <button onclick={() => step--} class="text-blue-600 text-sm font-semibold mt-2">Try another date</button>
+                <p class="text-gray-500 dark:text-gray-400">No available slots on this date.</p>
+                <button onclick={() => step--} class="text-blue-600 dark:text-blue-400 text-sm font-semibold mt-2">Try another date</button>
              </div>
         {:else}
             <div class="space-y-6">
@@ -314,7 +313,7 @@
                         <div class="grid grid-cols-3 gap-3">
                             {#each availableSlots.am as slot}
                                 <button
-                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 text-gray-900 border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-transparent hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                     onclick={() => selectTime(slot)}
                                 >
                                     {formatTime(slot)}
@@ -330,7 +329,7 @@
                         <div class="grid grid-cols-3 gap-3">
                             {#each availableSlots.pm as slot}
                                 <button
-                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 text-gray-900 border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border border-transparent hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                                     onclick={() => selectTime(slot)}
                                 >
                                     {formatTime(slot)}
@@ -349,31 +348,31 @@
          {@const selectedStyles = getServiceStyles(selectedService?.color)}
          <div class="space-y-6">
             <!-- Review Card -->
-            <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-4">
+            <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 space-y-4">
                 <div class="flex items-start gap-4">
                     <div class={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${selectedStyles.bg} ${selectedStyles.text}`}>
                         <SelectedIcon size={24} />
                     </div>
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Service</p>
-                        <h3 class="font-bold text-gray-900 text-lg">{selectedService?.name}</h3>
-                        <p class="text-sm text-gray-500">{selectedService?.duration || 30} min</p>
+                        <h3 class="font-bold text-gray-900 dark:text-white text-lg">{selectedService?.name}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{selectedService?.duration || 30} min</p>
                     </div>
                 </div>
 
-                <div class="h-px bg-gray-200 w-full"></div>
+                <div class="h-px bg-gray-200 dark:bg-gray-700 w-full"></div>
 
                 <div class="grid grid-cols-2 gap-4">
                      <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date</p>
-                        <div class="flex items-center gap-2 text-gray-900 font-semibold">
+                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Date</p>
+                        <div class="flex items-center gap-2 text-gray-900 dark:text-white font-semibold">
                             <Calendar size={16} class="text-blue-500" />
                             {selectedDate?.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </div>
                      </div>
                      <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Time</p>
-                         <div class="flex items-center gap-2 text-gray-900 font-semibold">
+                         <div class="flex items-center gap-2 text-gray-900 dark:text-white font-semibold">
                             <Clock size={16} class="text-blue-500" />
                             {selectedTime ? formatTime(selectedTime) : ''}
                         </div>
@@ -386,7 +385,7 @@
             <button 
                 onclick={handleConfirm}
                 disabled={creating}
-                class="w-full h-14 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-2xl shadow-blue-200 shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                class="w-full h-14 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
                 {#if creating}
                      Processing...

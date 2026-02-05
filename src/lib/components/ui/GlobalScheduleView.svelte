@@ -193,22 +193,22 @@
   initialSlots={editingRule?.slots}
 />
 
-<div class="bg-gray-50 min-h-full flex flex-col">
+<div class="bg-gray-50 dark:bg-gray-950 min-h-full flex flex-col">
   <!-- Header -->
-  <header class="bg-white border-b border-gray-100 sticky top-0 z-10">
+  <header class="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-10">
     <div class="px-4 py-3 flex items-center justify-between">
       <button 
         onclick={onBack}
-        class="p-2 -ml-2 text-gray-600 hover:bg-gray-50 rounded-full transition-colors"
+        class="p-2 -ml-2 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-colors"
       >
         <ChevronLeft size={24} />
       </button>
       
-      <h1 class="text-lg font-bold text-gray-900">Global Schedule</h1>
+      <h1 class="text-lg font-bold text-gray-900 dark:text-white">Global Schedule</h1>
       
       <button 
         onclick={onBack}
-        class="text-blue-600 font-semibold text-sm hover:text-blue-700"
+        class="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:text-blue-700 dark:hover:text-blue-300"
       >
         Done
       </button>
@@ -226,20 +226,20 @@
       {:else}
         <div class="space-y-3">
           {#each rules as rule}
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
               <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-gray-900 text-lg">{getDayLabel(rule.days)}</h3>
+                  <h3 class="font-bold text-gray-900 dark:text-white text-lg">{getDayLabel(rule.days)}</h3>
                   <button 
                     onclick={() => openEditModal(rule)}
-                    class="text-gray-400 hover:text-blue-600 transition-colors"
+                    class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
                     <Pencil size={14} />
                   </button>
                 </div>
                 <button 
                   onclick={() => handleDelete(rule.id)}
-                  class="text-red-400 hover:text-red-600 p-1 hover:bg-red-50 rounded-lg transition-colors"
+                  class="text-red-400 hover:text-red-600 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
                   <Trash2 size={18} class="fill-red-50" />
                 </button>
@@ -247,12 +247,12 @@
 
               <div class="space-y-2">
                 {#if rule.slots.length === 0}
-                   <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                   <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
                        CLOSED
                    </div>
                 {:else}
                    {#each rule.slots as slot}
-                     <div class="flex items-center gap-2 text-sm text-gray-600 font-medium">
+                     <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 font-medium">
                        <Clock size={16} class="text-gray-400" />
                        <span>{formatTime(slot.start)} - {formatTime(slot.end)}</span>
                      </div>
@@ -268,12 +268,12 @@
       <!-- Dashed border button container -->
        <button 
             onclick={openAddModal}
-            class="w-full border-2 border-dashed border-blue-200 bg-white hover:bg-blue-50/50 active:bg-blue-50 rounded-2xl py-4 flex items-center justify-center gap-2 transition-all group"
+            class="w-full border-2 border-dashed border-blue-200 dark:border-blue-800 bg-white dark:bg-gray-900 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 active:bg-blue-50 dark:active:bg-blue-900/20 rounded-2xl py-4 flex items-center justify-center gap-2 transition-all group"
         >
-            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Plus size={18} class="stroke-[3]" />
             </div>
-            <span class="font-bold text-blue-600">Add Rule</span>
+            <span class="font-bold text-blue-600 dark:text-blue-400">Add Rule</span>
         </button>
     </div>
 

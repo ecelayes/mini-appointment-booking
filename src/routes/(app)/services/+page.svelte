@@ -94,13 +94,13 @@
   };
 
   const colorPresets: Record<string, { bg: string; text: string }> = {
-    blue: { bg: "bg-blue-100", text: "text-blue-600" },
-    purple: { bg: "bg-purple-100", text: "text-purple-600" },
-    green: { bg: "bg-green-100", text: "text-green-600" },
-    orange: { bg: "bg-orange-100", text: "text-orange-600" },
-    pink: { bg: "bg-pink-100", text: "text-pink-600" },
-    red: { bg: "bg-red-100", text: "text-red-600" },
-    gray: { bg: "bg-gray-100", text: "text-gray-600" },
+    blue: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
+    purple: { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-600 dark:text-purple-400" },
+    green: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
+    orange: { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400" },
+    pink: { bg: "bg-pink-100 dark:bg-pink-900/30", text: "text-pink-600 dark:text-pink-400" },
+    red: { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400" },
+    gray: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-600 dark:text-gray-400" },
   };
 
   const getServiceStyles = (color?: string) => {
@@ -244,18 +244,18 @@
     }}
   />
 {:else}
-  <div class="bg-gray-50 px-6 pt-8 min-h-full pb-20">
+  <div class="bg-gray-50 dark:bg-gray-950 px-6 pt-8 min-h-full pb-20">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Manage</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Manage</h1>
     </header>
 
     <!-- Tabs -->
-    <div class="flex border-b border-gray-200 mb-6 relative">
+    <div class="flex border-b border-gray-200 dark:border-gray-800 mb-6 relative">
       <button
         class="flex-1 pb-3 text-sm font-semibold transition-colors relative {activeTab ===
         'services'
-          ? 'text-blue-600'
-          : 'text-gray-500'}"
+          ? 'text-blue-600 dark:text-blue-400'
+          : 'text-gray-500 dark:text-gray-500'}"
         onclick={() => (activeTab = "services")}
       >
         Services
@@ -268,8 +268,8 @@
       <button
         class="flex-1 pb-3 text-sm font-semibold transition-colors relative {activeTab ===
         'hours'
-          ? 'text-blue-600'
-          : 'text-gray-500'}"
+          ? 'text-blue-600 dark:text-blue-400'
+          : 'text-gray-500 dark:text-gray-500'}"
         onclick={() => (activeTab = "hours")}
       >
         Business Hours
@@ -293,16 +293,16 @@
             <span>Add New Service</span>
           </button>
         {:else}
-          <section class="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-4 mb-6">
-              <div class="bg-purple-100 p-2 rounded-xl text-purple-600 shrink-0">
+          <section class="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/20 rounded-2xl p-4 flex items-start gap-4 mb-6">
+              <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-xl text-purple-600 dark:text-purple-400 shrink-0">
                   <Building2 size={24} />
               </div>
               <div class="flex-1">
-                  <h3 class="font-bold text-gray-900 text-sm mb-1">Configure Business Profile</h3>
-                  <p class="text-xs text-purple-800/80 leading-relaxed mb-3">
+                  <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">Configure Business Profile</h3>
+                  <p class="text-xs text-purple-800/80 dark:text-purple-300 leading-relaxed mb-3">
                        You need to upload your business details to start accepting bookings.
                   </p>
-                  <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 bg-white border border-purple-200 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-colors">
+                  <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 dark:text-purple-300 bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 px-3 py-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
                       Setup Profile
                   </a>
               </div>
@@ -312,13 +312,13 @@
         {#if loading}
           <div class="space-y-4">
             <div
-              class="h-24 bg-gray-200 rounded-2xl w-full animate-pulse"
+              class="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full animate-pulse"
             ></div>
             <div
-              class="h-24 bg-gray-200 rounded-2xl w-full animate-pulse"
+              class="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full animate-pulse"
             ></div>
             <div
-              class="h-24 bg-gray-200 rounded-2xl w-full animate-pulse"
+              class="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full animate-pulse"
             ></div>
           </div>
         {:else}
@@ -339,7 +339,7 @@
                 {#each services as service, i}
                   <!-- Card Component -->
                   <Card
-                    class="flex items-start p-4 bg-white !rounded-2xl !shadow-sm !border-none"
+                    class="flex items-start p-4 bg-white dark:bg-gray-900 !rounded-2xl !shadow-sm !border-none"
                   >
                     <!-- Icon / Image Placeholder -->
                     {@const styles = getServiceStyles(service.color)}
@@ -355,7 +355,7 @@
                     <!-- Content -->
                     <div class="flex-1 min-w-0 pt-0.5">
                       <h3
-                        class="font-bold text-gray-900 text-base leading-tight mb-1"
+                        class="font-bold text-gray-900 dark:text-white text-base leading-tight mb-1"
                       >
                         {service.name}
                       </h3>
@@ -369,7 +369,7 @@
                           </div>
                           <span class="text-gray-300">•</span>
                         {/if}
-                        <div class="font-bold text-blue-500">
+                        <div class="font-bold text-blue-500 dark:text-blue-400">
                           ${(service.price || 0).toFixed(2)}
                         </div>
                       </div>
@@ -378,13 +378,13 @@
                     <!-- Actions -->
                     <div class="flex items-center gap-1 ml-2 self-center">
                       <button
-                        class="p-2 text-gray-400 hover:text-blue-500 hover:bg-gray-50 rounded-lg transition-colors"
+                        class="p-2 text-gray-400 hover:text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         onclick={() => openEditModal(service)}
                       >
                         <Pencil size={18} />
                       </button>
                       <button
-                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
+                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         onclick={() => handleDelete(service)}
                       >
                         <Trash2 size={18} />
@@ -404,18 +404,18 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <div
-              class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm cursor-pointer hover:border-blue-200 transition-colors"
+              class="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800 shadow-sm cursor-pointer hover:border-blue-200 dark:hover:border-blue-800 transition-colors"
               onclick={() => (view = "global_schedule")}
             >
               <div class="flex justify-between items-start mb-6">
                 <div>
-                  <h3 class="font-bold text-gray-900 text-lg">
+                  <h3 class="font-bold text-gray-900 dark:text-white text-lg">
                     Global Schedule
                   </h3>
                   <p class="text-xs text-gray-400 mt-1">Updated recently</p>
                 </div>
                 <span
-                  class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full tracking-wide"
+                  class="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold px-2 py-1 rounded-full tracking-wide"
                 >
                   ACTIVE
                 </span>
@@ -424,10 +424,10 @@
               <div class="space-y-4">
                 {#each globalScheduleRules as rule}
                   <div class="flex justify-between items-start text-sm">
-                    <span class="font-medium text-gray-600 w-24"
+                    <span class="font-medium text-gray-600 dark:text-gray-400 w-24"
                       >{getDayLabel(rule.days)}</span
                     >
-                    <div class="font-bold text-gray-900 text-right">
+                    <div class="font-bold text-gray-900 dark:text-white text-right">
                       {#if rule.slots.length === 0}
                         <span class="text-red-500">CLOSED</span>
                       {:else}
@@ -439,22 +439,22 @@
                       {/if}
                     </div>
                   </div>
-                  <div class="h-px bg-gray-50 last:hidden"></div>
+                  <div class="h-px bg-gray-50 dark:bg-gray-800 last:hidden"></div>
                 {/each}
               </div>
             </div>
           {:else}
             <button
-              class="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-blue-300 hover:bg-blue-50/10 transition-all group bg-white"
+              class="border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/10 transition-all group bg-white dark:bg-gray-900"
               onclick={() => (view = "global_schedule")}
             >
               <div
-                class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform"
+                class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform"
               >
                 <Plus size={24} />
               </div>
               <div class="text-center">
-                <h3 class="font-bold text-blue-600 mb-1">
+                <h3 class="font-bold text-blue-600 dark:text-blue-400 mb-1">
                   Add Global Schedule
                 </h3>
                 <p class="text-sm text-gray-400">
@@ -465,16 +465,16 @@
           {/if}
 
           <button
-            class="border-2 border-dashed border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-blue-300 hover:bg-blue-50/10 transition-all group bg-white"
+            class="border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/10 transition-all group bg-white dark:bg-gray-900"
             onclick={() => alert("Custom schedule feature coming soon")}
           >
             <div
-              class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform"
+              class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform"
             >
               <Plus size={24} />
             </div>
             <div class="text-center">
-              <h3 class="font-bold text-blue-600 mb-1">Add Custom Schedule</h3>
+              <h3 class="font-bold text-blue-600 dark:text-blue-400 mb-1">Add Custom Schedule</h3>
               <p class="text-sm text-gray-400">
                 Set specific dates or holiday schedules
               </p>

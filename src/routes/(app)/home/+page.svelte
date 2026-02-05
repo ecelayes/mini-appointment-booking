@@ -79,11 +79,11 @@
     }}
 />
 
-<div class="bg-gray-50 px-6 pt-8 min-h-full pb-20">
+<div class="bg-gray-50 dark:bg-gray-950 px-6 pt-8 min-h-full pb-20">
     <!-- Header -->
     <header class="flex justify-between items-center mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">Home</h1>
-        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 overflow-hidden">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Home</h1>
+        <div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 overflow-hidden">
             {#if authState.user?.picture}
                 <img src={authState.user.picture} alt="Profile" class="h-full w-full object-cover" />
             {:else}
@@ -95,12 +95,12 @@
     <div class="space-y-8">
         <!-- Greetings -->
         <section>
-            <h2 class="text-3xl font-extrabold text-gray-900 mb-6">
+            <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-6">
                 Welcome back, {authState.user?.name || 'User'}!
             </h2>
             
             {#if hasServices && hasActiveSchedule}
-            <Button fullWidth onclick={() => isBookingModalOpen = true} class="h-14 text-lg shadow-blue-200/50 shadow-lg">
+            <Button fullWidth onclick={() => isBookingModalOpen = true} class="h-14 text-lg !bg-blue-500 hover:!bg-blue-600 active:!bg-blue-700">
                 Book a New Appointment
             </Button>
             {/if}
@@ -110,16 +110,16 @@
         {#if hasMissingConfig && !loading}
              <div class="flex flex-col gap-3">
                 {#if !provider}
-                <section class="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-4">
-                    <div class="bg-purple-100 p-2 rounded-xl text-purple-600 shrink-0">
+                <section class="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/20 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-xl text-purple-600 dark:text-purple-400 shrink-0">
                         <Building2 size={24} />
                     </div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 text-sm mb-1">Configure Business Profile</h3>
-                        <p class="text-xs text-purple-800/80 leading-relaxed mb-3">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">Configure Business Profile</h3>
+                        <p class="text-xs text-purple-800/80 dark:text-purple-300 leading-relaxed mb-3">
                              You need to upload your business details to start accepting bookings.
                         </p>
-                        <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 bg-white border border-purple-200 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-colors">
+                        <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 dark:text-purple-300 bg-white dark:bg-gray-900 border border-purple-200 dark:border-purple-800 px-3 py-1.5 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors">
                             Setup Profile
                         </a>
                     </div>
@@ -127,16 +127,16 @@
                 {/if}
 
                 {#if !hasActiveSchedule}
-                <section class="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4">
-                    <div class="bg-blue-100 p-2 rounded-xl text-blue-600 shrink-0">
+                <section class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-xl text-blue-600 dark:text-blue-400 shrink-0">
                         <Calendar size={24} />
                     </div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 text-sm mb-1">Set up your Business Hours</h3>
-                        <p class="text-xs text-blue-700/80 leading-relaxed mb-3">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">Set up your Business Hours</h3>
+                        <p class="text-xs text-blue-700/80 dark:text-blue-300 leading-relaxed mb-3">
                             Customers won't be able to book appointments until you define your weekly availability.
                         </p>
-                        <a href="/services?tab=hours" class="inline-flex items-center text-xs font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
+                        <a href="/services?tab=hours" class="inline-flex items-center text-xs font-bold text-blue-600 dark:text-blue-300 bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-800 px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                             Configure Schedule
                         </a>
                     </div>
@@ -144,16 +144,16 @@
                 {/if}
 
                 {#if !hasServices}
-                <section class="bg-yellow-50 border border-yellow-100 rounded-2xl p-4 flex items-start gap-4">
-                    <div class="bg-yellow-100 p-2 rounded-xl text-yellow-600 shrink-0">
+                <section class="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/20 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-xl text-yellow-600 dark:text-yellow-400 shrink-0">
                         <MoreVertical size={24} />
                     </div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-gray-900 text-sm mb-1">Create your Services</h3>
-                         <p class="text-xs text-yellow-800/80 leading-relaxed mb-3">
+                        <h3 class="font-bold text-gray-900 dark:text-white text-sm mb-1">Create your Services</h3>
+                         <p class="text-xs text-yellow-800/80 dark:text-yellow-300 leading-relaxed mb-3">
                             Start by adding the services you offer to your clients.
                         </p>
-                        <a href="/services" class="inline-flex items-center text-xs font-bold text-yellow-700 bg-white border border-yellow-200 px-3 py-1.5 rounded-lg hover:bg-yellow-50 transition-colors">
+                        <a href="/services" class="inline-flex items-center text-xs font-bold text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-900 border border-yellow-200 dark:border-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors">
                             Add Services
                         </a>
                     </div>
@@ -166,33 +166,33 @@
 
         {#if hasServices && (hasActiveSchedule || loading)}
         <section>
-            <h3 class="text-lg font-bold text-gray-900 mb-4">Today's Appointments</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Today's Appointments</h3>
             
             <div class="flex flex-col gap-4">
                 {#if loading}
                     <div class="animate-pulse flex flex-col gap-4">
-                        <div class="h-24 bg-gray-200 rounded-2xl w-full"></div>
-                        <div class="h-24 bg-gray-200 rounded-2xl w-full"></div>
+                        <div class="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full"></div>
+                        <div class="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl w-full"></div>
                     </div>
                 {:else if appointments.length === 0}
-                    <div class="text-center py-10 bg-white rounded-2xl border-dashed border-2 border-gray-100">
+                    <div class="text-center py-10 bg-white dark:bg-gray-900 rounded-2xl border-dashed border-2 border-gray-100 dark:border-gray-800">
                         <p class="text-gray-400 font-medium">No appointments for today.</p>
                     </div>
                 {:else}
                     {#each appointments as appt}
                         <Card class="flex gap-4 p-4">
                             <!-- Time Box -->
-                            <div class="flex flex-col items-center justify-center w-16 h-20 bg-indigo-100 rounded-xl shrink-0 text-indigo-600">
+                            <div class="flex flex-col items-center justify-center w-16 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl shrink-0 text-indigo-600 dark:text-indigo-400">
                                 <span class="text-xs font-bold">{getAmPm(appt.date)}</span>
                                 <span class="text-xl font-bold leading-none">{getTimeOnly(appt.date)}</span>
                             </div>
 
                             <!-- Info -->
                             <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                <h4 class="font-bold text-gray-900 text-lg leading-tight truncate">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-lg leading-tight truncate">
                                     {businessState.services.find(s => s.id === appt.serviceId)?.name || 'Unknown Service'}
                                 </h4>
-                                <p class="text-xs text-green-600 font-medium mt-1">
+                                <p class="text-xs text-green-600 dark:text-green-400 font-medium mt-1">
                                     Confirmed
                                 </p>
                             </div>
