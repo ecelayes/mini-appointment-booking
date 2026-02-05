@@ -16,9 +16,16 @@ class AuthStore {
       const stored = localStorage.getItem('user');
       if (stored) {
         try {
-          this.user = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.id) {
+            this.user = parsed;
+          } else {
+            console.warn("Cleared invalid user data from localStorage");
+            localStorage.removeItem('user');
+          }
         } catch (e) {
           console.error("Failed to parse stored user", e);
+          localStorage.removeItem('user');
         }
       }
     }

@@ -155,7 +155,7 @@ class ApiService {
 
     const data = await res.json();
     return {
-      id: data.id,
+      id: data.uid || data.id,
       name: data.name || 'User',
       email: data.email,
       picture: data.picture,
