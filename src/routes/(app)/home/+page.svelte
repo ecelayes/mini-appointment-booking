@@ -3,7 +3,7 @@
     import { api, type Appointment } from '$lib/services/api';
     import { authState } from '$lib/stores/auth.svelte';
     import { goto } from '$app/navigation';
-    import { User as UserIcon, MoreVertical } from 'lucide-svelte';
+    import { User as UserIcon, MoreVertical, Calendar, Building2 } from 'lucide-svelte';
     import Button from '$lib/components/ui/Button.svelte';
     import Card from '$lib/components/ui/Card.svelte';
     import BookingModal from '$lib/components/ui/BookingModal.svelte';
@@ -17,6 +17,17 @@
     
     // Derived from store
     let hasServices = $derived(businessState.services.length > 0);
+    let globalSchedule = $derived(businessState.globalSchedule);
+    let provider = $derived(businessState.provider);
+    
+    // Check if there are any enabled days with slots
+    let hasActiveSchedule = $derived(
+        globalSchedule && globalSchedule.days 
+        ? Object.values(globalSchedule.days).some(d => d.enabled && d.ranges && d.ranges.length > 0)
+        : false
+    );
+
+    let hasMissingConfig = $derived(!hasServices || !hasActiveSchedule || !provider);
 
     onMount(() => {
         loadPageData();
@@ -88,15 +99,72 @@
                 Welcome back, {authState.user?.name || 'User'}!
             </h2>
             
-            {#if hasServices}
+            {#if hasServices && hasActiveSchedule}
             <Button fullWidth onclick={() => isBookingModalOpen = true} class="h-14 text-lg shadow-blue-200/50 shadow-lg">
                 Book a New Appointment
             </Button>
             {/if}
         </section>
 
-        <!-- Today's Appointments -->
-        {#if hasServices}
+        <!-- Missing Config Notifications -->
+        {#if hasMissingConfig && !loading}
+             <div class="flex flex-col gap-3">
+                {#if !provider}
+                <section class="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-purple-100 p-2 rounded-xl text-purple-600 shrink-0">
+                        <Building2 size={24} />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-sm mb-1">Configure Business Profile</h3>
+                        <p class="text-xs text-purple-800/80 leading-relaxed mb-3">
+                             You need to upload your business details to start accepting bookings.
+                        </p>
+                        <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 bg-white border border-purple-200 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-colors">
+                            Setup Profile
+                        </a>
+                    </div>
+                </section>
+                {/if}
+
+                {#if !hasActiveSchedule}
+                <section class="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-blue-100 p-2 rounded-xl text-blue-600 shrink-0">
+                        <Calendar size={24} />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-sm mb-1">Set up your Business Hours</h3>
+                        <p class="text-xs text-blue-700/80 leading-relaxed mb-3">
+                            Customers won't be able to book appointments until you define your weekly availability.
+                        </p>
+                        <a href="/services?tab=hours" class="inline-flex items-center text-xs font-bold text-blue-600 bg-white border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors">
+                            Configure Schedule
+                        </a>
+                    </div>
+                </section>
+                {/if}
+
+                {#if !hasServices}
+                <section class="bg-yellow-50 border border-yellow-100 rounded-2xl p-4 flex items-start gap-4">
+                    <div class="bg-yellow-100 p-2 rounded-xl text-yellow-600 shrink-0">
+                        <MoreVertical size={24} />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-900 text-sm mb-1">Create your Services</h3>
+                         <p class="text-xs text-yellow-800/80 leading-relaxed mb-3">
+                            Start by adding the services you offer to your clients.
+                        </p>
+                        <a href="/services" class="inline-flex items-center text-xs font-bold text-yellow-700 bg-white border border-yellow-200 px-3 py-1.5 rounded-lg hover:bg-yellow-50 transition-colors">
+                            Add Services
+                        </a>
+                    </div>
+                </section>
+                {/if}
+             </div>
+        {/if}
+
+         <!-- Today's Appointments -->
+
+        {#if hasServices && (hasActiveSchedule || loading)}
         <section>
             <h3 class="text-lg font-bold text-gray-900 mb-4">Today's Appointments</h3>
             
@@ -139,11 +207,6 @@
                 {/if}
             </div>
         </section>
-        {:else if !loading}
-            <section class="text-center py-10 bg-yellow-50 rounded-2xl border border-yellow-200 p-6">
-                 <p class="text-yellow-700 font-medium mb-4">You haven't configured any services yet.</p>
-                 <a href="/services" class="text-blue-600 font-bold hover:underline">Go to Services to get started</a>
-            </section>
         {/if}
     </div>
 </div>

@@ -377,8 +377,7 @@ class ApiService {
     const payload = {
       scheduled_at: appointment.date,
       status: 'confirmed',
-      service: appointment.serviceId,
-      provider: appointment.providerName,
+      service_id: appointment.serviceId,
       notes: 'Created via frontend'
     };
 
@@ -393,11 +392,11 @@ class ApiService {
 
     return {
       id: created.id,
-      serviceId: created.service,
+      serviceId: created.service_id,
       serviceName: appointment.serviceName || 'Service',
       date: created.scheduled_at,
       status: created.status,
-      providerName: created.provider,
+      providerName: 'Provider',
       location: 'Online'
     };
   }

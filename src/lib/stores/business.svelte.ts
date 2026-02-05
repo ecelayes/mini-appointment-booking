@@ -55,6 +55,16 @@ class BusinessStore {
     }
   }
 
+  // Refresh just global schedule (e.g. after editing in GlobalScheduleView)
+  async refreshGlobalSchedule() {
+    if (!this.provider) return;
+    try {
+      this.globalSchedule = await api.getProviderSchedule(this.provider.id, "global");
+    } catch (e) {
+      console.error("Error refreshing global schedule", e);
+    }
+  }
+
   async createService(data: Partial<Service>) {
     if (!this.provider) throw new Error("No provider set");
     const item = await api.createService(data, this.provider.id);

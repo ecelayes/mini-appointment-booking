@@ -18,7 +18,9 @@
     Pencil,
     Trash2,
     Plus,
+    Building2,
   } from "lucide-svelte";
+  import { page } from '$app/stores';
   import Card from "$lib/components/ui/Card.svelte";
   import ServiceModal from "$lib/components/ui/ServiceModal.svelte";
   // BusinessHoursModal removal - it is now inside GlobalScheduleView
@@ -49,6 +51,10 @@
       globalSchedule && globalSchedule.days 
         ? convertScheduleToRules(globalSchedule.days) 
         : []
+  );
+
+  let hasActiveSchedule = $derived(
+      globalScheduleRules.some(rule => rule.slots.length > 0)
   );
 
   let isModalOpen = $state(false);
@@ -100,6 +106,12 @@
 
   onMount(() => {
     businessState.loadBusinessData();
+    
+    // Check for tab param
+    const tab = $page.url.searchParams.get('tab');
+    if (tab === 'hours') {
+        activeTab = 'hours';
+    }
   });
 
   function convertScheduleToRules(
@@ -259,12 +271,20 @@
             <span>Add New Service</span>
           </button>
         {:else}
-          <div class="text-center py-10 bg-yellow-50 rounded-2xl border border-yellow-200 p-6">
-             <p class="text-yellow-700 font-medium mb-4">You need to upload the business data to enable service loading</p>
-             <a href="/profile?action=edit_business" class="text-blue-600 font-bold hover:underline inline-block">
-                 Configure Business Profile
-             </a>
-          </div>
+          <section class="bg-purple-50 border border-purple-100 rounded-2xl p-4 flex items-start gap-4 mb-6">
+              <div class="bg-purple-100 p-2 rounded-xl text-purple-600 shrink-0">
+                  <Building2 size={24} />
+              </div>
+              <div class="flex-1">
+                  <h3 class="font-bold text-gray-900 text-sm mb-1">Configure Business Profile</h3>
+                  <p class="text-xs text-purple-800/80 leading-relaxed mb-3">
+                       You need to upload your business details to start accepting bookings.
+                  </p>
+                  <a href="/profile?action=edit_business" class="inline-flex items-center text-xs font-bold text-purple-700 bg-white border border-purple-200 px-3 py-1.5 rounded-lg hover:bg-purple-50 transition-colors">
+                      Setup Profile
+                  </a>
+              </div>
+          </section>
         {/if}
 
         {#if loading}
@@ -357,7 +377,7 @@
         {/if}
       {:else if activeTab === "hours"}
         <div class="grid grid-cols-1 gap-4">
-          {#if globalScheduleRules.length > 0}
+          {#if hasActiveSchedule}
             <!-- Global Schedule Summary Card -->
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->

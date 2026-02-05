@@ -4,6 +4,7 @@
   import BusinessHoursModal from './BusinessHoursModal.svelte';
   import { api, type Provider, type DaySchedule, type Schedule } from '$lib/services/api';
   import { authState } from '$lib/stores/auth.svelte';
+  import { businessState } from '$lib/stores/business.svelte';
 
   interface TimeSlot {
     start: string;
@@ -119,6 +120,9 @@
         
         // Refresh to get new ID if created
         currentSchedule = await api.getProviderSchedule(provider.id, 'global');
+        
+        // Refresh the business store so the services page shows updated data
+        await businessState.refreshGlobalSchedule();
         
     } catch (e) {
         console.error("Failed to save schedule", e);
