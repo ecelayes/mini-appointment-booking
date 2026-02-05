@@ -45,20 +45,20 @@
     
     <!-- Modal Container -->
     <div 
-        class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden transform transition-all animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-200"
+        class="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-xl overflow-hidden transform transition-all animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-200"
         onclick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
     >
         <!-- Header -->
-        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100">
-            <h2 id="confirm-modal-title" class="text-xl font-bold text-gray-900">
+        <div class="px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+            <h2 id="confirm-modal-title" class="text-xl font-bold text-gray-900 dark:text-white">
                 {title}
             </h2>
             <button 
               onclick={onCancel} 
-              class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Close"
             >
                 <X size={20} />
@@ -67,16 +67,16 @@
 
         <!-- Body -->
         <div class="p-6">
-            <p class="text-gray-600 leading-relaxed">
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
                 {message}
             </p>
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex gap-3 justify-end">
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex gap-3 justify-end">
             <button 
               onclick={onCancel}
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
                 {cancelText}
             </button>
