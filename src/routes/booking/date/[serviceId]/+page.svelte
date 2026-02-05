@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
-    import { api, type Service } from '$lib/services/api';
+    import { api, type Service, type SlotsByPeriod } from '$lib/services/api';
     import { onMount } from 'svelte';
     import Header from '$lib/components/layout/Header.svelte';
     import Button from '$lib/components/ui/Button.svelte';
@@ -14,7 +14,7 @@
     let currentDate = $state(new Date());
     let selectedDate = $state<Date | null>(null);
     let selectedTime = $state<string | null>(null);
-    let timeSlots = $state<string[]>([]);
+    let timeSlots = $state<SlotsByPeriod>({ am: [], pm: [] });
 
     onMount(async () => {
         service = await api.getService(serviceId ?? '');
@@ -128,19 +128,51 @@
                     Available Times on {monthNames[selectedDate.getMonth()]} {selectedDate.getDate()}
                 </h3>
                 
-                <div class="grid grid-cols-3 gap-3">
-                    {#each timeSlots as time}
-                        <button
-                            onclick={() => selectedTime = time}
-                            class="py-2.5 px-2 rounded-xl text-sm font-medium transition-all border
-                            {selectedTime === time 
-                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' 
-                                : 'bg-gray-100 text-gray-900 border-transparent hover:bg-gray-200'}"
-                        >
-                            {time}
-                        </button>
-                    {/each}
-                </div>
+                {#if timeSlots.am.length === 0 && timeSlots.pm.length === 0}
+                    <div class="text-center py-8 text-gray-500 text-sm">
+                        No available slots on this date.
+                    </div>
+                {:else}
+                    <div class="space-y-6">
+                        {#if timeSlots.am.length > 0}
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Morning</h4>
+                                <div class="grid grid-cols-3 gap-3">
+                                    {#each timeSlots.am as time}
+                                        <button
+                                            onclick={() => selectedTime = time}
+                                            class="py-2.5 px-2 rounded-xl text-sm font-medium transition-all border
+                                            {selectedTime === time 
+                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' 
+                                                : 'bg-gray-100 text-gray-900 border-transparent hover:bg-gray-200'}"
+                                        >
+                                            {time}
+                                        </button>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+                        
+                        {#if timeSlots.pm.length > 0}
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Afternoon</h4>
+                                <div class="grid grid-cols-3 gap-3">
+                                    {#each timeSlots.pm as time}
+                                        <button
+                                            onclick={() => selectedTime = time}
+                                            class="py-2.5 px-2 rounded-xl text-sm font-medium transition-all border
+                                            {selectedTime === time 
+                                                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' 
+                                                : 'bg-gray-100 text-gray-900 border-transparent hover:bg-gray-200'}"
+                                        >
+                                            {time}
+                                        </button>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
             </div>
         {/if}
     </div>

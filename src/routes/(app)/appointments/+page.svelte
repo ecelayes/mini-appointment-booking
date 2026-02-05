@@ -1,23 +1,38 @@
 <script lang="ts">
    import { onMount } from 'svelte';
-   import { api, type Appointment } from '$lib/services/api';
-   import { MoreVertical } from 'lucide-svelte';
+   import { api, type Appointment, type Service } from '$lib/services/api';
+   import { Trash2 } from 'lucide-svelte';
    import Card from '$lib/components/ui/Card.svelte';
+   import ConfirmModal from '$lib/components/ui/ConfirmModal.svelte';
 
    let activeTab = $state<'upcoming' | 'past'>('upcoming');
    let appointments = $state<Appointment[]>([]);
+   let services = $state<Service[]>([]);
    let loading = $state(false);
    let offset = $state(0);
    let hasMore = $state(true);
    const LIMIT = 10;
+   let cancelModalOpen = $state(false);
+   let appointmentToCancel = $state<Appointment | null>(null);
    
    let observer: IntersectionObserver;
    let sentinel: HTMLElement;
 
    // Load initial data
-   onMount(() => {
+   onMount(async () => {
+       // Load services first
+       try {
+           services = await api.getServices();
+       } catch (e) {
+           console.error('Failed to load services:', e);
+       }
        loadMore();
    });
+
+   function getServiceName(serviceId: string): string {
+       const service = services.find(s => s.id === serviceId);
+       return service?.name || 'Unknown Service';
+   }
 
    function changeTab(tab: 'upcoming' | 'past') {
        if (activeTab === tab) return;
@@ -75,6 +90,31 @@
    function formatTime(dateStr: string) {
        return new Date(dateStr).toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric' }).split(', ')[1];
    }
+
+   function handleCancel(appt: Appointment) {
+       appointmentToCancel = appt;
+       cancelModalOpen = true;
+   }
+
+   async function confirmCancel() {
+       if (!appointmentToCancel) return;
+
+       try {
+           await api.cancelAppointment(appointmentToCancel.id);
+           // Refresh the list
+           appointments = [];
+           offset = 0;
+           hasMore = true;
+           await loadMore();
+           cancelModalOpen = false;
+           appointmentToCancel = null;
+       } catch (e) {
+           console.error(e);
+           alert('Failed to cancel appointment');
+           cancelModalOpen = false;
+           appointmentToCancel = null;
+       }
+   }
 </script>
 
 <div class="bg-gray-50 px-6 pt-8 pb-20">
@@ -116,17 +156,19 @@
 
                 <!-- Info -->
                 <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                    <h3 class="font-bold text-gray-900 text-lg leading-tight">{appt.serviceName}</h3>
+                    <h3 class="font-bold text-gray-900 text-lg leading-tight">{getServiceName(appt.serviceId)}</h3>
                     <p class="text-sm text-gray-500">{formatTime(appt.date)}</p>
-                    {#if appt.providerName}
-                            <p class="text-xs text-gray-400 mt-1">with {appt.providerName} at {appt.location?.split(',')[0]}</p>
-                    {/if}
                 </div>
 
                 <!-- Action -->
-                <button class="text-gray-400 hover:text-gray-600 self-start">
-                    <MoreVertical size={20} />
-                </button>
+                {#if activeTab === 'upcoming'}
+                    <button 
+                        onclick={() => handleCancel(appt)}
+                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors self-center"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                {/if}
             </Card>
         {/each}
 
@@ -150,3 +192,13 @@
         {/if}
    </div>
 </div>
+
+<ConfirmModal
+  isOpen={cancelModalOpen}
+  title="Cancel Appointment?"
+  message={appointmentToCancel ? `Are you sure you want to cancel your appointment for ${appointmentToCancel.serviceName}? This action cannot be undone.` : ''}
+  confirmText="Cancel Appointment"
+  cancelText="Keep Appointment"
+  onConfirm={confirmCancel}
+  onCancel={() => { cancelModalOpen = false; appointmentToCancel = null; }}
+/>

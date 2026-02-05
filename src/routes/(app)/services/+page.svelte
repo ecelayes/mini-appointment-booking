@@ -23,6 +23,7 @@
   import { page } from '$app/stores';
   import Card from "$lib/components/ui/Card.svelte";
   import ServiceModal from "$lib/components/ui/ServiceModal.svelte";
+  import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   // BusinessHoursModal removal - it is now inside GlobalScheduleView
   import GlobalScheduleView from "$lib/components/ui/GlobalScheduleView.svelte";
   import { authState } from "$lib/stores/auth.svelte";
@@ -59,6 +60,8 @@
 
   let isModalOpen = $state(false);
   let editingService = $state<Service | null>(null);
+  let deleteModalOpen = $state(false);
+  let serviceToDelete = $state<Service | null>(null);
 
   const dayLabels: Record<string, string> = {
     mon: "Mon",
@@ -191,13 +194,23 @@
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Are you sure you want to delete this service?")) return;
+  function handleDelete(service: Service) {
+    serviceToDelete = service;
+    deleteModalOpen = true;
+  }
+
+  async function confirmDelete() {
+    if (!serviceToDelete) return;
+
     try {
-      await businessState.deleteService(id);
+      await businessState.deleteService(serviceToDelete.id);
+      deleteModalOpen = false;
+      serviceToDelete = null;
     } catch (e) {
       console.error(e);
       alert("Failed to delete service");
+      deleteModalOpen = false;
+      serviceToDelete = null;
     }
   }
 
@@ -211,6 +224,15 @@
   onSave={handleSave}
 />
 
+<ConfirmModal
+  isOpen={deleteModalOpen}
+  title="Delete Service?"
+  message={serviceToDelete ? `Are you sure you want to delete "${serviceToDelete.name}"? This action cannot be undone.` : ''}
+  confirmText="Delete"
+  cancelText="Cancel"
+  onConfirm={confirmDelete}
+  onCancel={() => { deleteModalOpen = false; serviceToDelete = null; }}
+/>
 
 
 {#if view === "global_schedule"}
@@ -363,7 +385,7 @@
                       </button>
                       <button
                         class="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-50 rounded-lg transition-colors"
-                        onclick={() => handleDelete(service.id)}
+                        onclick={() => handleDelete(service)}
                       >
                         <Trash2 size={18} />
                       </button>

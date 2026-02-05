@@ -5,10 +5,11 @@
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
-    import { api, type Appointment } from '$lib/services/api';
+    import { api, type Appointment, type Service } from '$lib/services/api';
 
     let appointmentId = $derived($page.url.searchParams.get('id'));
     let appointment = $state<Appointment | null>(null);
+    let service = $state<Service | null>(null);
     let loading = $state(true);
     let error = $state<string | null>(null);
 
@@ -16,6 +17,9 @@
         if (appointmentId) {
             try {
                 appointment = await api.getAppointment(appointmentId);
+                if (appointment?.serviceId) {
+                    service = await api.getService(appointment.serviceId);
+                }
             } catch (e: any) {
                 error = e.message;
             } finally {
@@ -61,7 +65,7 @@
                  <div class="text-blue-500 mt-1"><Scissors size={20}/></div>
                  <div>
                      <p class="text-sm text-gray-400 font-medium">Service</p>
-                     <p class="font-bold text-gray-900 text-lg">{appointment.serviceName}</p>
+                     <p class="font-bold text-gray-900 text-lg">{service?.name || 'Service'}</p>
                  </div>
             </div>
             <hr class="border-gray-100" />
@@ -80,14 +84,7 @@
                      <p class="font-bold text-gray-900 text-lg">{formatTime(appointment.date)}</p>
                  </div>
             </div>
-            <hr class="border-gray-100" />
-             <div class="flex items-start gap-4">
-                 <div class="text-blue-500 mt-1"><MapPin size={20}/></div>
-                 <div>
-                     <p class="text-sm text-gray-400 font-medium">Location</p>
-                     <p class="font-bold text-gray-900 text-lg">{appointment.location || 'Online'}</p>
-                 </div>
-            </div>
+
         {:else}
             <div class="text-center text-gray-500">No appointment found.</div>
         {/if}

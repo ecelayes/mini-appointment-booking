@@ -23,11 +23,9 @@ export interface Service {
 export interface Appointment {
   id: string;
   serviceId: string;
-  serviceName: string;
-  date: string; // ISO datestring
+  notes?: string;
+  date: string; // ISO datestring (scheduled_at)
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
-  providerName?: string;
-  location?: string;
 }
 
 
@@ -60,7 +58,58 @@ export interface Schedule {
   valid_to?: string;
 }
 
+export interface SlotsByPeriod {
+  am: string[];
+  pm: string[];
+}
+
 const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:8083';
+
+/**
+ * Filter out time slots that have already passed for same-day bookings
+ * @param slots - Array of time slots in HH:mm format
+ * @param selectedDate - The date selected by the user (YYYY-MM-DD format)
+ * @returns Filtered array of slots
+ */
+function filterPastSlots(slots: string[], selectedDate: string): string[] {
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  // Only filter if the selected date is today
+  if (selectedDate !== todayStr) {
+    return slots;
+  }
+
+  const currentHour = today.getHours();
+  const currentMinute = today.getMinutes();
+
+  return slots.filter(slot => {
+    const [hour, minute] = slot.split(':').map(Number);
+    // Keep slots that are in the future
+    return hour > currentHour || (hour === currentHour && minute > currentMinute);
+  });
+}
+
+/**
+ * Organize time slots into AM and PM periods
+ * @param slots - Array of time slots in HH:mm format
+ * @returns Object with am and pm arrays
+ */
+function organizeSlotsByPeriod(slots: string[]): SlotsByPeriod {
+  const am: string[] = [];
+  const pm: string[] = [];
+
+  slots.forEach(slot => {
+    const [hour] = slot.split(':').map(Number);
+    if (hour < 12) {
+      am.push(slot);
+    } else {
+      pm.push(slot);
+    }
+  });
+
+  return { am, pm };
+}
 
 class ApiService {
   private getHeaders(): HeadersInit {
@@ -297,15 +346,12 @@ class ApiService {
     const serviceMap = new Map(services.map(s => [s.id, s]));
 
     let appointments = data.map((item: any) => {
-      const service = serviceMap.get(item.service_id);
       return {
         id: item.id,
         serviceId: item.service_id,
-        serviceName: service ? service.name : (item.service_name || item.service_title || 'Service'),
+        notes: item.notes,
         date: item.scheduled_at,
-        status: item.status || 'confirmed',
-        providerName: item.provider,
-        location: 'Online'
+        status: item.status || 'confirmed'
       };
     });
 
@@ -344,16 +390,22 @@ class ApiService {
     return appointments;
   }
 
-  async getAvailableSlots(serviceId: string, date: string): Promise<string[]> {
+  async getAvailableSlots(serviceId: string, date: string): Promise<SlotsByPeriod> {
     const offset = -new Date().getTimezoneOffset();
     const res = await this.fetchWithRetry(`${BASE_URL}/api/slots?service=${serviceId}&date=${date}&timezone_offset=${offset}`);
 
     if (!res.ok) {
-      return [];
+      return { am: [], pm: [] };
     }
 
     const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    const slots = Array.isArray(data) ? data : [];
+
+    // Filter out past slots if the selected date is today
+    const filteredSlots = filterPastSlots(slots, date);
+
+    // Organize slots by AM/PM
+    return organizeSlotsByPeriod(filteredSlots);
   }
 
   async getAppointment(id: string): Promise<Appointment> {
@@ -365,11 +417,9 @@ class ApiService {
     return {
       id: item.id,
       serviceId: item.service,
-      serviceName: item.service_name || item.service_title || 'Service',
+      notes: item.notes,
       date: item.scheduled_at,
-      status: item.status || 'confirmed',
-      providerName: item.provider,
-      location: 'Online' // Default for now
+      status: item.status || 'confirmed'
     };
   }
 
@@ -393,12 +443,21 @@ class ApiService {
     return {
       id: created.id,
       serviceId: created.service_id,
-      serviceName: appointment.serviceName || 'Service',
+      notes: created.notes,
       date: created.scheduled_at,
-      status: created.status,
-      providerName: 'Provider',
-      location: 'Online'
+      status: created.status
     };
+  }
+
+  async cancelAppointment(id: string): Promise<void> {
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/appointments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        status: 'cancelled'
+      })
+    });
+
+    if (!res.ok) throw new Error('Failed to cancel appointment');
   }
 
   async getFirstProvider(): Promise<any> {

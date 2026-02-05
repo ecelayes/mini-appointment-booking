@@ -189,10 +189,9 @@
 
                             <!-- Info -->
                             <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                                <h4 class="font-bold text-gray-900 text-lg leading-tight truncate">{appt.serviceName}</h4>
-                                {#if appt.providerName}
-                                    <p class="text-xs text-gray-400 mt-1">with {appt.providerName}</p>
-                                {/if}
+                                <h4 class="font-bold text-gray-900 text-lg leading-tight truncate">
+                                    {businessState.services.find(s => s.id === appt.serviceId)?.name || 'Unknown Service'}
+                                </h4>
                                 <p class="text-xs text-green-600 font-medium mt-1">
                                     Confirmed
                                 </p>

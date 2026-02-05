@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Modal from './Modal.svelte';
-    import { api, type Service, type Appointment } from '$lib/services/api';
+    import { api, type Service, type Appointment, type SlotsByPeriod } from '$lib/services/api';
     import { 
         Briefcase, Scissors, Flower2, Heart, Dumbbell, PenTool, 
         Zap, Coffee, Music, Camera, Car, House,
@@ -22,7 +22,7 @@
     let selectedService = $state<Service | null>(null);
     let selectedDate = $state<Date | null>(null);
     let selectedTime = $state<string | null>(null);
-    let availableSlots = $state<string[]>([]);
+    let availableSlots = $state<SlotsByPeriod>({ am: [], pm: [] });
     let loading = $state(false);
     let creating = $state(false);
 
@@ -58,7 +58,7 @@
                 selectedService = null;
                 selectedDate = null;
                 selectedTime = null;
-                availableSlots = [];
+                availableSlots = { am: [], pm: [] };
                 viewDate = new Date();
             }, 300);
         }
@@ -130,7 +130,7 @@
             }
         } catch (e) {
             console.error(e);
-            availableSlots = [];
+            availableSlots = { am: [], pm: [] };
         } finally {
             loading = false;
         }
@@ -166,10 +166,8 @@
             
             await api.createAppointment({
                 serviceId: selectedService.id,
-                serviceName: selectedService.name,
                 date: date.toISOString(), // Backend should handle ISO
-                status: 'confirmed',
-                providerName: 'Online', // Placeholder
+                status: 'confirmed'
             });
 
             onSuccess();
@@ -303,21 +301,44 @@
             <div class="flex items-center justify-center h-40">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-        {:else if availableSlots.length === 0}
+        {:else if availableSlots.am.length === 0 && availableSlots.pm.length === 0}
              <div class="text-center py-10">
                 <p class="text-gray-500">No available slots on this date.</p>
                 <button onclick={() => step--} class="text-blue-600 text-sm font-semibold mt-2">Try another date</button>
              </div>
         {:else}
-            <div class="grid grid-cols-3 gap-3">
-                {#each availableSlots as slot}
-                    <button
-                        class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 text-gray-900 border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-                        onclick={() => selectTime(slot)}
-                    >
-                        {formatTime(slot)}
-                    </button>
-                {/each}
+            <div class="space-y-6">
+                {#if availableSlots.am.length > 0}
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Morning</h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            {#each availableSlots.am as slot}
+                                <button
+                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 text-gray-900 border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                    onclick={() => selectTime(slot)}
+                                >
+                                    {formatTime(slot)}
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+                
+                {#if availableSlots.pm.length > 0}
+                    <div>
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Afternoon</h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            {#each availableSlots.pm as slot}
+                                <button
+                                    class="py-2 px-3 rounded-lg text-sm font-semibold bg-gray-50 text-gray-900 border border-transparent hover:border-blue-200 hover:bg-blue-50 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                    onclick={() => selectTime(slot)}
+                                >
+                                    {formatTime(slot)}
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
             </div>
         {/if}
 
@@ -359,13 +380,7 @@
                      </div>
                 </div>
 
-                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Location</p>
-                     <div class="flex items-center gap-2 text-gray-900 font-semibold">
-                        <MapPin size={16} class="text-blue-500" />
-                        Online
-                    </div>
-                 </div>
+
             </div>
 
             <button 
