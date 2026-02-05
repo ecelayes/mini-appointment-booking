@@ -18,7 +18,7 @@
             try {
                 appointment = await api.getAppointment(appointmentId);
                 if (appointment?.serviceId) {
-                    service = await api.getService(appointment.serviceId);
+                    service = (await api.getService(appointment.serviceId)) || null;
                 }
             } catch (e: any) {
                 error = e.message;

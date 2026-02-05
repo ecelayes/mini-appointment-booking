@@ -1,4 +1,4 @@
-<script lang="ts">
+z<script lang="ts">
   import { onMount } from 'svelte';
   import { ChevronLeft, Plus, Clock, Pencil, Trash2 } from 'lucide-svelte';
   import BusinessHoursModal from './BusinessHoursModal.svelte';

@@ -26,6 +26,7 @@ export interface Appointment {
   notes?: string;
   date: string; // ISO datestring (scheduled_at)
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
+  serviceName?: string;
 }
 
 
@@ -58,9 +59,51 @@ export interface Schedule {
   valid_to?: string;
 }
 
+
 export interface SlotsByPeriod {
   am: string[];
   pm: string[];
+}
+
+
+interface RawUser {
+  uid?: string;
+  id?: string;
+  name?: string;
+  email: string;
+  picture?: string;
+  roleId?: string;
+}
+
+interface RawService {
+  id: string;
+  title: string;
+  description: string | Record<string, unknown>;
+  duration_minutes: number;
+  price?: number;
+  cost?: number;
+  icon_url?: string;
+  color?: string;
+  provider_id?: string;
+}
+
+interface RawAppointment {
+  id: string;
+  service_id: string;
+  notes?: string;
+  scheduled_at: string;
+  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
+  service?: RawService;
+}
+
+interface RawProvider {
+  id: string;
+  user_id?: string;
+  phone?: string;
+  address?: string;
+  avatar_url?: string;
+  establishment_name?: string;
+  full_name?: string;
 }
 
 const BASE_URL = PUBLIC_BACKEND_URL || 'http://localhost:8083';
@@ -182,10 +225,10 @@ class ApiService {
       throw new Error('Login failed: ' + res.statusText);
     }
 
-    const data = await res.json();
+    const data = await res.json() as RawUser;
 
     const user: User = {
-      id: data.uid,
+      id: data.uid || data.id || '',
       name: data.name || 'User',
       email: data.email,
       picture: data.picture,
@@ -204,9 +247,9 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to fetch user');
 
-    const data = await res.json();
+    const data = await res.json() as RawUser;
     return {
-      id: data.uid || data.id,
+      id: data.uid || data.id || '',
       name: data.name || 'User',
       email: data.email,
       picture: data.picture,
@@ -219,10 +262,10 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to fetch services');
 
-    const data = await res.json();
+    const data = await res.json() as RawService[];
     if (!Array.isArray(data)) return [];
 
-    return data.map((item: any) => ({
+    return data.map((item) => ({
       id: item.id,
       name: item.title || 'Untitled Service',
       description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
@@ -234,7 +277,7 @@ class ApiService {
   }
 
   async createService(service: Partial<Service>, providerId?: string): Promise<Service> {
-    const payload: any = {
+    const payload: Partial<RawService> = {
       title: service.name,
       description: service.description,
       duration_minutes: service.duration,
@@ -254,7 +297,7 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to create service');
 
-    const item = await res.json();
+    const item = await res.json() as RawService;
     return {
       id: item.id,
       name: item.title || 'Untitled Service',
@@ -283,7 +326,7 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to update service');
 
-    const item = await res.json();
+    const item = await res.json() as RawService;
     return {
       id: item.id,
       name: item.title || 'Untitled Service',
@@ -307,7 +350,7 @@ class ApiService {
     try {
       const res = await this.fetchWithRetry(`${BASE_URL}/api/services/${id}`);
       if (!res.ok) return undefined;
-      const item = await res.json();
+      const item = await res.json() as RawService;
 
       return {
         id: item.id,
@@ -340,15 +383,17 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to fetch appointments');
 
-    const data = await res.json();
+    const data = await res.json() as RawAppointment[];
     if (!Array.isArray(data)) return [];
 
     const serviceMap = new Map(services.map(s => [s.id, s]));
 
-    let appointments = data.map((item: any) => {
+    let appointments = data.map((item) => {
+      const service = serviceMap.get(item.service_id);
       return {
         id: item.id,
         serviceId: item.service_id,
+        serviceName: service?.name,
         notes: item.notes,
         date: item.scheduled_at,
         status: item.status || 'confirmed'
@@ -438,7 +483,7 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to create appointment');
 
-    const created = await res.json();
+    const created = await res.json() as RawAppointment;
 
     return {
       id: created.id,
@@ -460,16 +505,16 @@ class ApiService {
     if (!res.ok) throw new Error('Failed to cancel appointment');
   }
 
-  async getFirstProvider(): Promise<any> {
+  async getFirstProvider(): Promise<RawProvider | null> {
     const res = await this.fetchWithRetry(`${BASE_URL}/api/providers?limit=1`);
 
     if (!res.ok) throw new Error('Failed to fetch provider');
 
-    const data = await res.json();
+    const data = await res.json() as RawProvider[];
     return data && data.length > 0 ? data[0] : null;
   }
 
-  async updateProvider(id: string, data: any): Promise<void> {
+  async updateProvider(id: string, data: Partial<RawProvider>): Promise<void> {
     const res = await this.fetchWithRetry(`${BASE_URL}/api/providers/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data)
@@ -486,7 +531,7 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to create provider');
 
-    const created = await res.json();
+    const created = await res.json() as RawProvider;
 
     return {
       id: created.id,
