@@ -4,6 +4,8 @@
    import { Trash2 } from 'lucide-svelte';
    import Card from '$lib/components/ui/Card.svelte';
    import ConfirmModal from '$lib/components/ui/ConfirmModal.svelte';
+   import RestrictionModal from '$lib/components/ui/RestrictionModal.svelte';
+   import { goto } from '$app/navigation';
 
    let activeTab = $state<'upcoming' | 'past'>('upcoming');
    let appointments = $state<Appointment[]>([]);
@@ -15,6 +17,7 @@
    let cancelModalOpen = $state(false);
    let providerId = $state<string | undefined>(undefined);
    let appointmentToCancel = $state<Appointment | null>(null);
+   let restrictionOpen = $state(false);
    
    let observer: IntersectionObserver;
    let sentinel: HTMLElement;
@@ -32,6 +35,7 @@
            } else {
              console.warn("No provider found for current user");
              hasMore = false; // No provider, so no appointments to load. Prevents infinite loop.
+             restrictionOpen = true;
            }
        } catch (e) {
            console.error('Failed to load initial data:', e);
@@ -218,4 +222,13 @@
   cancelText="Keep Appointment"
   onConfirm={confirmCancel}
   onCancel={() => { cancelModalOpen = false; appointmentToCancel = null; }}
+/>
+
+<RestrictionModal
+  isOpen={restrictionOpen}
+  title="Setup Required"
+  message="You need to set up your business profile before you can manage appointments."
+  actionLabel="Setup Profile"
+  onAction={() => goto('/profile?action=edit_business')}
+  onClose={() => goto('/')} 
 />

@@ -217,32 +217,37 @@ z<script lang="ts">
 
   <div class="p-4 space-y-6">
     <div class="space-y-4">
-      <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1">Weekly availability rules</h2>
+      <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-1">Weekly availability rules</h2>
       
       {#if rules.length === 0}
-        <div class="text-center py-8 text-gray-400 text-sm bg-white rounded-2xl border border-dashed border-gray-200">
+        <div class="text-center py-8 text-gray-400 dark:text-gray-500 text-sm bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-200 dark:border-gray-800">
           No availability rules set.
         </div>
       {:else}
         <div class="space-y-3">
           {#each rules as rule}
             <div class="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-800">
-              <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                   <h3 class="font-bold text-gray-900 dark:text-white text-lg">{getDayLabel(rule.days)}</h3>
-                  <button 
-                    onclick={() => openEditModal(rule)}
-                    class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <Pencil size={14} />
-                  </button>
                 </div>
-                <button 
-                  onclick={() => handleDelete(rule.id)}
-                  class="text-red-400 hover:text-red-600 dark:hover:text-red-400 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                >
-                  <Trash2 size={18} class="fill-red-50" />
-                </button>
+                
+                <div class="flex items-center gap-1">
+                    <button 
+                        onclick={() => openEditModal(rule)}
+                        class="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                        title="Edit rule"
+                    >
+                        <Pencil size={18} />
+                    </button>
+                    <button 
+                        onclick={() => handleDelete(rule.id)}
+                        class="text-red-400 hover:text-red-600 dark:hover:text-red-400 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Delete rule"
+                    >
+                        <Trash2 size={18} class="fill-red-50" />
+                    </button>
+                </div>
               </div>
 
               <div class="space-y-2">
