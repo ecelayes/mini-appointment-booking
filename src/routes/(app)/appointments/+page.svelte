@@ -13,6 +13,7 @@
    let hasMore = $state(true);
    const LIMIT = 10;
    let cancelModalOpen = $state(false);
+   let providerId = $state<string | undefined>(undefined);
    let appointmentToCancel = $state<Appointment | null>(null);
    
    let observer: IntersectionObserver;
@@ -20,13 +21,22 @@
 
    // Load initial data
    onMount(async () => {
-       // Load services first
        try {
-           services = await api.getServices();
+           const provider = await api.getMyProvider();
+           if (provider) {
+               providerId = provider.id;
+               // Load services using provider ID
+               services = await api.getServices(providerId);
+               // Load appointments only if we have a provider
+               loadMore();
+           } else {
+             console.warn("No provider found for current user");
+             hasMore = false; // No provider, so no appointments to load. Prevents infinite loop.
+           }
        } catch (e) {
-           console.error('Failed to load services:', e);
+           console.error('Failed to load initial data:', e);
+           hasMore = false;
        }
-       loadMore();
    });
 
    function getServiceName(serviceId: string): string {
@@ -40,17 +50,23 @@
        appointments = [];
        offset = 0;
        hasMore = true;
-       loadMore();
+       // Only load if we have a provider
+       if (providerId) {
+           loadMore();
+       } else {
+           hasMore = false;
+       }
    }
 
    async function loadMore() {
-       if (loading || !hasMore) return;
+       if (loading || !hasMore || !providerId) return;
        loading = true;
        try {
            const newAppointments = await api.getAppointments({
                type: activeTab,
                limit: LIMIT,
-               offset
+               offset,
+               providerId: providerId
            });
            
            if (newAppointments.length < LIMIT) {
@@ -61,6 +77,7 @@
            offset += LIMIT;
        } catch (e) {
            console.error(e);
+           hasMore = false; // Stop trying if error occurs
        } finally {
            loading = false;
        }

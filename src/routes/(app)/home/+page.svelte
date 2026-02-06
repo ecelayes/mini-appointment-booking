@@ -40,7 +40,11 @@
             await businessState.loadBusinessData();
 
             if (businessState.services.length > 0) {
-                const res = await api.getAppointments({ type: 'upcoming', limit: 20 });
+                const res = await api.getAppointments({ 
+                    type: 'upcoming', 
+                    limit: 20,
+                    providerId: businessState.provider?.id 
+                });
                 
                 const today = new Date();
                 const todayStr = today.toDateString();
@@ -77,6 +81,7 @@
     onSuccess={() => {
         loadPageData();
     }}
+    providerId={businessState.provider?.id}
 />
 
 <div class="bg-gray-50 dark:bg-gray-950 px-6 pt-8 min-h-full pb-20">

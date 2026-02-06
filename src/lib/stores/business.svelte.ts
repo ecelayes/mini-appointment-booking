@@ -28,7 +28,7 @@ class BusinessStore {
 
       if (this.provider) {
         const [fetchedServices, schedule] = await Promise.all([
-          api.getServices(),
+          api.getServices(this.provider.id),
           api.getProviderSchedule(this.provider.id, "global")
         ]);
         this.services = fetchedServices;
@@ -49,7 +49,7 @@ class BusinessStore {
   async refreshServices() {
     if (!this.provider) return; // Can't have services without provider generally, or api handles it
     try {
-      this.services = await api.getServices();
+      this.services = await api.getServices(this.provider.id);
     } catch (e) {
       console.error(e);
     }

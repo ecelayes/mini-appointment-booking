@@ -12,9 +12,10 @@
         isOpen: boolean;
         onClose: () => void;
         onSuccess: () => void;
+        providerId?: string;
     }
 
-    let { isOpen, onClose, onSuccess }: Props = $props();
+    let { isOpen, onClose, onSuccess, providerId }: Props = $props();
 
     // State
     let step = $state(0);
@@ -73,7 +74,7 @@
     async function loadServices() {
         loading = true;
         try {
-            services = await api.getServices();
+            services = await api.getServices(providerId);
         } catch (e) {
             console.error(e);
         } finally {

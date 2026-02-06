@@ -257,8 +257,12 @@ class ApiService {
     };
   }
 
-  async getServices(): Promise<Service[]> {
-    const res = await this.fetchWithRetry(`${BASE_URL}/api/services`);
+  async getServices(providerId?: string): Promise<Service[]> {
+    let url = `${BASE_URL}/api/services`;
+    if (providerId) {
+      url += `?provider_id=${providerId}`;
+    }
+    const res = await this.fetchWithRetry(url);
 
     if (!res.ok) throw new Error('Failed to fetch services');
 
@@ -367,18 +371,19 @@ class ApiService {
     }
   }
 
-  async getAppointments(options?: { type?: 'upcoming' | 'past', limit?: number, offset?: number }): Promise<Appointment[]> {
+  async getAppointments(options?: { type?: 'upcoming' | 'past', limit?: number, offset?: number, providerId?: string }): Promise<Appointment[]> {
     const params = new URLSearchParams();
     if (options?.type) params.append('type', options.type);
     if (options?.limit) params.append('limit', options.limit.toString());
     if (options?.offset) params.append('offset', options.offset.toString());
+    if (options?.providerId) params.append('provider_id', options.providerId);
 
     const queryString = params.toString();
     const url = `${BASE_URL}/api/appointments${queryString ? `?${queryString}` : ''}`;
 
     const [res, services] = await Promise.all([
       this.fetchWithRetry(url),
-      this.getServices().catch(() => [])
+      this.getServices(options?.providerId).catch(() => [])
     ]);
 
     if (!res.ok) throw new Error('Failed to fetch appointments');
@@ -510,6 +515,16 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to fetch provider');
 
+    const data = await res.json() as RawProvider[];
+    return data && data.length > 0 ? data[0] : null;
+  }
+
+  async getProviderByUserId(userId: string): Promise<RawProvider | null> {
+    // Note: Backend must support ?user_id=... filtering on providers endpoint
+    // OR we use the current 'List' which scopes to logged in user.
+    // If usage is "get MY provider", then list behavior is correct.
+    const res = await this.fetchWithRetry(`${BASE_URL}/api/providers?limit=1`);
+    if (!res.ok) throw new Error('Failed to fetch provider');
     const data = await res.json() as RawProvider[];
     return data && data.length > 0 ? data[0] : null;
   }
