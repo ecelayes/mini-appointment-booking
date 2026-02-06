@@ -14,9 +14,9 @@ export interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number; // in minutes
+  duration: number;
   price: number;
-  icon?: string; // e.g. "dental", "cut"
+  icon?: string;
   color?: string;
 }
 
@@ -24,7 +24,7 @@ export interface Appointment {
   id: string;
   serviceId: string;
   notes?: string;
-  date: string; // ISO datestring (scheduled_at)
+  date: string;
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
   serviceName?: string;
 }
@@ -118,7 +118,6 @@ function filterPastSlots(slots: string[], selectedDate: string): string[] {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-  // Only filter if the selected date is today
   if (selectedDate !== todayStr) {
     return slots;
   }
@@ -128,7 +127,6 @@ function filterPastSlots(slots: string[], selectedDate: string): string[] {
 
   return slots.filter(slot => {
     const [hour, minute] = slot.split(':').map(Number);
-    // Keep slots that are in the future
     return hour > currentHour || (hour === currentHour && minute > currentMinute);
   });
 }
@@ -395,18 +393,18 @@ class ApiService {
 
     let appointments = data.map((item) => {
       const service = serviceMap.get(item.service_id);
+      const name = (item as any).service_name || service?.name;
+
       return {
         id: item.id,
         serviceId: item.service_id,
-        serviceName: service?.name,
+        serviceName: name,
         notes: item.notes,
         date: item.scheduled_at,
         status: item.status || 'confirmed'
       };
     });
 
-    // Client-side filtering/sorting/pagination fallback
-    // This logic handles backends that ignore query parameters (limit/type/offset)
     if (options) {
       const now = new Date();
 
@@ -429,8 +427,6 @@ class ApiService {
       });
 
       if (options.offset !== undefined && options.limit !== undefined) {
-        // Heuristic: If backend returned more items than requested limit, it ignored pagination params.
-        // In this case, we must enforce pagination on the client side.
         if (data.length > options.limit) {
           appointments = appointments.slice(options.offset, options.offset + options.limit);
         }
@@ -451,10 +447,8 @@ class ApiService {
     const data = await res.json();
     const slots = Array.isArray(data) ? data : [];
 
-    // Filter out past slots if the selected date is today
     const filteredSlots = filterPastSlots(slots, date);
 
-    // Organize slots by AM/PM
     return organizeSlotsByPeriod(filteredSlots);
   }
 
@@ -598,14 +592,28 @@ class ApiService {
     }));
   }
 
+  private slotsCache: Map<string, { data: SlotsByPeriod, timestamp: number }> = new Map();
+
   async getPublicAvailableSlots(providerId: string, serviceId: string, date: string): Promise<SlotsByPeriod> {
+    const cacheKey = `${providerId}-${serviceId}-${date}`;
+    const cached = this.slotsCache.get(cacheKey);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp < 60000)) {
+      return cached.data;
+    }
+
     const offset = -new Date().getTimezoneOffset();
     const res = await fetch(`${BASE_URL}/public/providers/${providerId}/slots?service=${serviceId}&date=${date}&timezone_offset=${offset}`);
     if (!res.ok) return { am: [], pm: [] };
     const data = await res.json();
     const slots = Array.isArray(data) ? data : [];
     const filteredSlots = filterPastSlots(slots, date);
-    return organizeSlotsByPeriod(filteredSlots);
+    const result = organizeSlotsByPeriod(filteredSlots);
+
+    this.slotsCache.set(cacheKey, { data: result, timestamp: now });
+
+    return result;
   }
 
   async createPublicAppointment(providerId: string, appointment: Partial<Appointment> & { clientName?: string, clientPhone?: string }): Promise<Appointment> {
