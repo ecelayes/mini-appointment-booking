@@ -581,6 +581,63 @@ class ApiService {
 
     if (!res.ok) throw new Error('Failed to update schedule');
   }
+
+  async getPublicServices(providerId: string): Promise<Service[]> {
+    const res = await fetch(`${BASE_URL}/public/providers/${providerId}/services`);
+    if (!res.ok) throw new Error('Failed to fetch services');
+    const data = await res.json() as RawService[];
+    if (!Array.isArray(data)) return [];
+    return data.map((item) => ({
+      id: item.id,
+      name: item.title || 'Untitled Service',
+      description: typeof item.description === 'string' ? item.description : JSON.stringify(item.description || ''),
+      duration: item.duration_minutes || 0,
+      price: item.price !== undefined ? item.price : (item.cost !== undefined ? item.cost : 0),
+      icon: item.icon_url,
+      color: item.color
+    }));
+  }
+
+  async getPublicAvailableSlots(providerId: string, serviceId: string, date: string): Promise<SlotsByPeriod> {
+    const offset = -new Date().getTimezoneOffset();
+    const res = await fetch(`${BASE_URL}/public/providers/${providerId}/slots?service=${serviceId}&date=${date}&timezone_offset=${offset}`);
+    if (!res.ok) return { am: [], pm: [] };
+    const data = await res.json();
+    const slots = Array.isArray(data) ? data : [];
+    const filteredSlots = filterPastSlots(slots, date);
+    return organizeSlotsByPeriod(filteredSlots);
+  }
+
+  async createPublicAppointment(providerId: string, appointment: Partial<Appointment> & { clientName?: string, clientPhone?: string }): Promise<Appointment> {
+    const notes = `Client: ${appointment.clientName || 'N/A'}, Phone: ${appointment.clientPhone || 'N/A'}. ${appointment.notes || ''}`;
+
+    const payload = {
+      scheduled_at: appointment.date,
+      status: 'confirmed',
+      service_id: appointment.serviceId,
+      notes: notes
+    };
+
+    const res = await fetch(`${BASE_URL}/public/providers/${providerId}/appointments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to create appointment');
+    }
+
+    const created = await res.json() as RawAppointment;
+    return {
+      id: created.id,
+      serviceId: created.service_id,
+      notes: created.notes,
+      date: created.scheduled_at,
+      status: created.status
+    };
+  }
 }
 
 export const api = new ApiService();
